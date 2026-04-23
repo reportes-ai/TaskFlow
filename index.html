@@ -181,6 +181,22 @@ const pC=p=>({Baja:'p-low',Media:'p-med',Alta:'p-high'}[p]||'p-low');
 const uName=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.name:id;};
 const uInit=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.initials:'?';};
 const uCol=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.color:'av-user';};
+// Returns tasks visible to current user based on hierarchy
+function visibleTasks(){
+  const u=S.user;
+  if(!u) return [];
+  if(u.role==='admin') return DATA.tasks;
+  // Direct reports
+  const directReports=DATA.users.filter(x=>x.supervisor_id===u.id).map(x=>x.id);
+  // Visible = tasks where user participates OR tasks where any direct report participates
+  return DATA.tasks.filter(t=>{
+    const assignees=t.assignees||[];
+    if(assignees.includes(u.id)) return true;
+    if(directReports.some(rid=>assignees.includes(rid))) return true;
+    return false;
+  });
+}
+
 const fmtDate=iso=>{try{return new Date(iso).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});}catch{return iso;}};
 const fmtDue=s=>{if(!s||s==='—')return '—';const p=s.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s;};
 const toIsoDate=s=>{if(!s||s==='—')return null;if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const p=s.split(/[/\-]/);if(p.length===3&&p[2].length===4)return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;return s;};
@@ -346,7 +362,7 @@ function nav(view,btn){
 }
 
 function renderView(){
-  const titles={tasks:'Todas las tareas',my:'Mis tareas',reports:'Reportes',users:'Gestión de usuarios'};
+  const titles={tasks:S.user&&S.user.role!=='admin'&&DATA.users.some(x=>x.supervisor_id===S.user.id)?'Mi equipo':'Todas las tareas',my:'Mis tareas',reports:'Reportes',users:'Gestión de usuarios'};
   const pt=document.getElementById('pg-title');if(pt) pt.textContent=titles[S.view]||'';
   const act=document.getElementById('tb-actions');
   if(act){
@@ -354,7 +370,7 @@ function renderView(){
     else if(S.view==='users') act.innerHTML=`<button class="btn btn-primary" onclick="openNewUser()">+ Nuevo usuario</button>`;
     else act.innerHTML='';
   }
-  if(S.view==='tasks') renderTasks(DATA.tasks);
+  if(S.view==='tasks') renderTasks(visibleTasks());
   else if(S.view==='my') renderTasks(DATA.tasks.filter(t=>(t.assignees||[]).includes(S.user.id)));
   else if(S.view==='reports') renderReports();
   else if(S.view==='users') renderUsers();
@@ -630,12 +646,14 @@ function renderUsers(){
       <div class="stat-card"><div class="stat-num">${DATA.tasks.length}</div><div class="stat-label">Tareas</div></div>
     </div>
     <div class="sec-label">Usuarios del sistema</div>
-    <table class="data-table"><thead><tr><th>Usuario</th><th>Email</th><th>PIN</th><th>Tareas</th><th></th></tr></thead><tbody>
+    <table class="data-table"><thead><tr><th>Usuario</th><th>Supervisor</th><th>PIN</th><th>Tareas</th><th></th></tr></thead><tbody>
     ${users.map(u=>{
       const n=DATA.tasks.filter(t=>(t.assignees||[]).includes(u.id)).length;
+      const sup=u.supervisor_id?DATA.users.find(x=>x.id===u.supervisor_id):null;
+      const deps=DATA.users.filter(x=>x.supervisor_id===u.id);
       return `<tr>
-        <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar ${u.color}" style="width:30px;height:30px;font-size:11px">${u.initials}</div><span style="font-weight:500">${u.name}</span></div></td>
-        <td style="color:var(--text2)">${u.email}</td>
+        <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar ${u.color}" style="width:30px;height:30px;font-size:11px">${u.initials}</div><div><div style="font-weight:500">${u.name}</div>${deps.length?`<div style="font-size:10px;color:var(--text3)">Supervisa a: ${deps.map(d=>d.name.split(' ')[0]).join(', ')}</div>`:''}</div></div></td>
+        <td style="color:var(--text2);font-size:12px">${sup?`<div style="display:flex;align-items:center;gap:6px"><div class="avatar ${sup.color}" style="width:20px;height:20px;font-size:8px">${sup.initials}</div>${sup.name}</div>`:'<span style="color:var(--text3)">—</span>'}</td>
         <td><span style="font-family:'DM Mono',monospace">${u.pin||'1234'}</span> <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;margin-left:6px" onclick="editPin('${u.id}')">cambiar</button></td>
         <td>${n}</td>
         <td><button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Eliminar</button></td>
@@ -644,11 +662,18 @@ function renderUsers(){
 }
 
 function openNewUser(){
+  const everyone=DATA.users;
   openModal(`
     <div class="modal-head"><div class="modal-title">Crear usuario</div><button class="close-btn" onclick="closeModal()">×</button></div>
     <div class="modal-body">
       <div class="form-group"><div class="form-label">Nombre completo *</div><input type="text" id="nu-na" placeholder="Nombre Apellido"></div>
       <div class="form-group"><div class="form-label">Email *</div><input type="text" id="nu-em" placeholder="usuario@empresa.com"></div>
+      <div class="form-group"><div class="form-label">Supervisor directo</div>
+        <select id="nu-sup">
+          <option value="">— Sin supervisor (nivel raíz) —</option>
+          ${everyone.map(u=>`<option value="${u.id}">${u.name}${u.role==='admin'?' (Admin)':''}</option>`).join('')}
+        </select>
+      </div>
       <div class="form-group"><div class="form-label">PIN de acceso (4 dígitos)</div><input type="text" id="nu-pi" placeholder="1234" maxlength="4" style="font-family:'DM Mono',monospace;letter-spacing:6px;font-size:20px;text-align:center"></div>
     </div>
     <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="btn-nu" onclick="createUser()">Crear usuario</button></div>`);
@@ -664,7 +689,8 @@ async function createUser(){
   if(btn){btn.disabled=true;btn.textContent='Creando...';}
   const parts=name.split(' ');
   const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
-  const {error}=await db.from('tf_users').insert({id:uid(),name,email,role:'user',initials,color:'av-user',pin});
+  const supId=document.getElementById('nu-sup').value||null;
+  const {error}=await db.from('tf_users').insert({id:uid(),name,email,role:'user',initials,color:'av-user',pin,supervisor_id:supId});
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear usuario';}return;}
   closeModal();toast('Usuario creado');await loadAll();
 }
