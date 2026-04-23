@@ -198,6 +198,7 @@ function renderApp(){
     <div class="sidebar">
       <div class="sidebar-logo">
         <div class="logo-text">Task<em>Flow</em></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:1px;font-weight:500;letter-spacing:.3px">AutoFácil</div>
         <div class="sync-status" id="sync-status">Conectando...</div>
       </div>
       <div class="user-card">
@@ -255,7 +256,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.0</span>');
   updateBadges();
   if(S.user) renderView();
 }
