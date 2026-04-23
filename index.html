@@ -487,7 +487,7 @@ async function logProgress(){
   const {error:e1}=await db.from('tf_progress').insert({task_id:t.id,user_id:S.user.id,text:txt,pct});
   if(e1){toast('Error: '+e1.message);if(btn){btn.disabled=false;btn.textContent='Guardar avance';}return;}
   await db.from('tf_tasks').update({progress:pct,status:stat,stage:STAGES.indexOf(stat),}).eq('id',t.id);
-  toast('Avance guardado');
+  toast('Avance guardado');await loadAll();
 }
 
 async function addComment(){
@@ -497,7 +497,7 @@ async function addComment(){
   if(btn){btn.disabled=true;btn.textContent='Publicando...';}
   const {error}=await db.from('tf_comments').insert({task_id:curTaskId,user_id:S.user.id,text:txt});
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Publicar';}return;}
-  toast('Comentario publicado');
+  toast('Comentario publicado');await loadAll();
 }
 
 function openNewTask(){
@@ -533,7 +533,7 @@ async function createTask(){
     created_by:S.user.id
   });
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear tarea';}return;}
-  closeModal();toast('Tarea creada');
+  closeModal();toast('Tarea creada');await loadAll();
 }
 
 function openEditTask(id){
@@ -571,13 +571,13 @@ async function saveTask(id){
     
   }).eq('id',id);
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Guardar';}return;}
-  closeModal();toast('Tarea actualizada');
+  closeModal();toast('Tarea actualizada');await loadAll();
 }
 
 async function deleteTask(id){
   if(!confirm('¿Eliminar esta tarea?')) return;
   await db.from('tf_tasks').delete().eq('id',id);
-  closeModal();toast('Tarea eliminada');
+  closeModal();toast('Tarea eliminada');await loadAll();
 }
 
 function renderReports(){
@@ -666,7 +666,7 @@ async function createUser(){
   const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
   const {error}=await db.from('tf_users').insert({id:uid(),name,email,role:'user',initials,color:'av-user',pin});
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear usuario';}return;}
-  closeModal();toast('Usuario creado');
+  closeModal();toast('Usuario creado');await loadAll();
 }
 
 function editMyPin(){
@@ -719,7 +719,7 @@ async function deleteUser(id){
   const affected=DATA.tasks.filter(t=>(t.assignees||[]).includes(id));
   for(const t of affected) await db.from('tf_tasks').update({assignees:t.assignees.filter(a=>a!==id)}).eq('id',t.id);
   await db.from('tf_users').delete().eq('id',id);
-  toast('Usuario eliminado');
+  toast('Usuario eliminado');await loadAll();
 }
 
 function openModal(html,closeable=true){
