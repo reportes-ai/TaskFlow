@@ -350,7 +350,7 @@ function renderView(){
   const pt=document.getElementById('pg-title');if(pt) pt.textContent=titles[S.view]||'';
   const act=document.getElementById('tb-actions');
   if(act){
-    if(S.view==='tasks'||S.view==='my') act.innerHTML=S.user.role==='admin'?`<button class="btn btn-primary" onclick="openNewTask()">+ Nueva tarea</button>`:'';
+    if(S.view==='tasks'||S.view==='my') act.innerHTML=`<button class="btn btn-primary" onclick="openNewTask()">+ Nueva tarea</button>`;
     else if(S.view==='users') act.innerHTML=`<button class="btn btn-primary" onclick="openNewUser()">+ Nuevo usuario</button>`;
     else act.innerHTML='';
   }
@@ -400,7 +400,7 @@ function openTask(id){
   curTaskId=id;
   const t=DATA.tasks.find(x=>x.id===id);if(!t) return;
   const isAdmin=S.user.role==='admin';
-  const canEdit=isAdmin||(t.assignees||[]).includes(S.user.id);
+  const canEdit=true;
   const pLogs=DATA.progress[id]||[];
   const coms=DATA.comments[id]||[];
   openModal(`
@@ -433,7 +433,7 @@ function showTab(tab){
   const c=document.getElementById('tab-body');if(!t||!c) return;
   const pLogs=DATA.progress[t.id]||[];
   const coms=DATA.comments[t.id]||[];
-  const canLog=(t.assignees||[]).includes(S.user.id)||S.user.role==='admin';
+  const canLog=true;
   if(tab==='detail'){
     c.innerHTML=`
       <div class="form-group"><div class="form-label">Descripción</div><div style="font-size:13px;color:var(--text2);line-height:1.6">${t.description||'—'}</div></div>
