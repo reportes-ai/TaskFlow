@@ -17,8 +17,7 @@
   --blue:#2563eb;--blue-light:#dbeafe;--blue-text:#1e3a8a;
   --gray-light:#f1f0ea;--gray-text:#57534e;
   --radius:10px;--radius-lg:14px;--radius-xl:20px;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-  --shadow-lg:0 4px 16px rgba(0,0,0,.1);
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-lg:0 4px 16px rgba(0,0,0,.1);
   font-family:'DM Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -51,6 +50,7 @@ body{background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
 .page-title{font-size:16px;font-weight:600;flex:1;letter-spacing:-.3px}
 .btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--surface2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn-primary:hover{background:#4338ca}
 .btn-danger{background:var(--red-light);color:var(--red-text);border-color:#fca5a588}
@@ -61,7 +61,7 @@ body{background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
 .filter-chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
 .filter-chip:hover{border-color:var(--border2)}
 .filter-chip.active{background:var(--accent-light);color:var(--accent-text);border-color:#a5b4fc}
-input[type=text],input[type=email],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+input[type=text],input[type=email],input[type=password],input[type=date],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
 input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 textarea{resize:vertical;min-height:70px;line-height:1.5}
 select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6860' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
@@ -75,7 +75,7 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%
 .tc-avatars .avatar{width:20px;height:20px;font-size:8px;margin-left:-4px;border:1.5px solid var(--surface)}
 .tc-avatars .avatar:first-child{margin-left:0}
 .pbar-wrap{height:3px;background:var(--surface2);border-radius:3px;flex:1;max-width:70px}
-.pbar{height:3px;border-radius:3px;background:var(--accent);transition:width .3s}
+.pbar{height:3px;border-radius:3px;background:var(--accent)}
 .stage-row{display:flex;margin:8px 0 10px}
 .stage-cell{flex:1;text-align:center;font-size:9px;padding:3px 2px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);border-right:none;font-weight:500}
 .stage-cell:first-child{border-radius:4px 0 0 4px}
@@ -135,23 +135,19 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%
 .checkbox-list input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
 .pbar-full{height:8px;background:var(--surface2);border-radius:8px;overflow:hidden}
 .pbar-full .pbar{height:8px}
-/* Config screen */
-.config-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
-.config-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:32px;width:100%;max-width:480px;box-shadow:var(--shadow-lg)}
-.config-title{font-size:22px;font-weight:600;letter-spacing:-.5px;margin-bottom:4px}
-.config-title em{color:var(--accent);font-style:normal}
-.config-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6}
-.config-step{font-size:12px;color:var(--text3);margin-bottom:6px;font-weight:500}
 .realtime-dot{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pin-wrap{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.pin-input{width:52px;height:52px;text-align:center;font-size:22px;font-weight:600;border:2px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);color:var(--text);font-family:'DM Mono',monospace;outline:none;transition:border-color .15s}
+.pin-input:focus{border-color:var(--accent)}
+.error-msg{color:var(--red);font-size:12px;text-align:center;min-height:16px;margin-top:4px}
 </style>
 </head>
 <body>
 
 <!-- ============================================================
   CONFIGURACIÓN — Edita estas dos líneas con tus datos de Supabase
-  Project URL y anon key los encuentras en:
-  Supabase > Settings > API
+  Settings > API Keys > Project URL y Publishable key
 ============================================================ -->
 <script>
 const SUPABASE_URL = 'https://wvjzzefvimaegrphixdq.supabase.co';
@@ -167,33 +163,27 @@ const SUPABASE_KEY = 'sb_publishable_ELtS16GnfSyQXIp6aupMCg_uG-yD5yG';
 const STAGES=['Pendiente','En progreso','En revisión','Completada','Bloqueada'];
 const PRIOS=['Baja','Media','Alta'];
 
-// Mostrar pantalla de configuración si no hay credenciales
 if(SUPABASE_URL==='REEMPLAZA_CON_TU_PROJECT_URL'){
-  document.getElementById('root').innerHTML=`
-  <div class="config-screen">
-    <div class="config-card">
-      <div class="config-title">Task<em>Flow</em></div>
-      <div class="config-sub">Antes de usar la app, configura tu conexión a Supabase editando el archivo <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace">index.html</code>.</div>
-      <div style="background:var(--surface2);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);line-height:2">
-        <div class="config-step">Líneas a editar (al inicio del &lt;script&gt;):</div>
-        <div style="color:var(--accent)">const SUPABASE_URL = '<span style="color:var(--text)">tu-project-url</span>';</div>
-        <div style="color:var(--accent)">const SUPABASE_KEY = '<span style="color:var(--text)">tu-anon-key</span>';</div>
-      </div>
-      <div style="margin-top:16px;font-size:12px;color:var(--text3)">Encuentra estos valores en <strong>Supabase → Settings → API</strong></div>
-    </div>
-  </div>`;
-  throw new Error('Configura SUPABASE_URL y SUPABASE_KEY en index.html');
+  document.getElementById('root').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#6b6860;text-align:center;padding:20px"><div><div style="font-size:40px;margin-bottom:16px">⚙️</div><div style="font-size:18px;font-weight:600;margin-bottom:8px">Configura TaskFlow</div><div>Edita SUPABASE_URL y SUPABASE_KEY en index.html</div></div></div>`;
+  throw new Error('Configura las credenciales');
 }
 
-// Inicializar Supabase
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let S={user:null,view:'tasks',fStatus:'all',fUser:'all'};
 let DATA={users:[],tasks:[],progress:{},comments:{}};
 let curTaskId=null;
 
-// ---- INIT ----
+const uid=()=>([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
+const sC=s=>({Pendiente:'p-pending','En progreso':'p-progress','En revisión':'p-review',Completada:'p-done',Bloqueada:'p-blocked'}[s]||'p-pending');
+const pC=p=>({Baja:'p-low',Media:'p-med',Alta:'p-high'}[p]||'p-low');
+const uName=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.name:id;};
+const uInit=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.initials:'?';};
+const uCol=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.color:'av-user';};
+const fmtDate=iso=>{try{return new Date(iso).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});}catch{return iso;}};
+const fmtDue=s=>{if(!s||s==='—')return '—';const p=s.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s;};
+
 async function init(){
   renderApp();
   await loadAll();
@@ -207,14 +197,11 @@ function renderApp(){
     <div class="sidebar">
       <div class="sidebar-logo">
         <div class="logo-text">Task<em>Flow</em></div>
-        <div class="sync-status" id="sync-status"><span class="realtime-dot"></span>Conectado</div>
+        <div class="sync-status" id="sync-status">Conectando...</div>
       </div>
       <div class="user-card" onclick="showSwitchUser()">
         <div class="avatar" id="sb-avatar"></div>
-        <div class="user-info">
-          <div class="user-name" id="sb-name">—</div>
-          <div class="user-role" id="sb-role">—</div>
-        </div>
+        <div class="user-info"><div class="user-name" id="sb-name">—</div><div class="user-role" id="sb-role">—</div></div>
         <button class="switch-link" onclick="event.stopPropagation();showSwitchUser()">cambiar</button>
       </div>
       <nav class="nav">
@@ -245,48 +232,34 @@ function renderApp(){
         <div class="page-title" id="pg-title">Cargando...</div>
         <div id="tb-actions"></div>
       </div>
-      <div class="content" id="content">
-        <div class="empty"><div style="font-size:32px;margin-bottom:12px">⏳</div><div>Cargando datos desde la nube...</div></div>
-      </div>
+      <div class="content" id="content"><div class="empty"><div style="font-size:32px;margin-bottom:12px">⏳</div><div>Cargando datos...</div></div></div>
     </div>
   </div>`;
 }
 
-// ---- DATA LOADING ----
 async function loadAll(){
   setSyncStatus('sincronizando...');
-  const [usersR,tasksR,progressR,commentsR]=await Promise.all([
+  const [uR,tR,pR,cR]=await Promise.all([
     db.from('tf_users').select('*').order('created_at'),
     db.from('tf_tasks').select('*').order('created_at',{ascending:false}),
     db.from('tf_progress').select('*').order('created_at'),
     db.from('tf_comments').select('*').order('created_at'),
   ]);
-  DATA.users=usersR.data||[];
-  DATA.tasks=tasksR.data||[];
-  // Index progress and comments by task_id
+  DATA.users=uR.data||[];
+  DATA.tasks=tR.data||[];
   DATA.progress={};
-  (progressR.data||[]).forEach(p=>{
-    if(!DATA.progress[p.task_id]) DATA.progress[p.task_id]=[];
-    DATA.progress[p.task_id].push(p);
-  });
+  (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
-  (commentsR.data||[]).forEach(c=>{
-    if(!DATA.comments[c.task_id]) DATA.comments[c.task_id]=[];
-    DATA.comments[c.task_id].push(c);
-  });
+  (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
   setSyncStatus('<span class="realtime-dot"></span>En vivo');
   updateBadges();
   if(S.user) renderView();
 }
 
-function setSyncStatus(html){
-  const el=document.getElementById('sync-status');
-  if(el) el.innerHTML=html;
-}
+function setSyncStatus(html){const el=document.getElementById('sync-status');if(el)el.innerHTML=html;}
 
-// ---- REALTIME ----
 function subscribeRealtime(){
-  db.channel('taskflow')
+  db.channel('tf-live')
     .on('postgres_changes',{event:'*',schema:'public',table:'tf_tasks'},()=>loadAll())
     .on('postgres_changes',{event:'*',schema:'public',table:'tf_progress'},()=>loadAll())
     .on('postgres_changes',{event:'*',schema:'public',table:'tf_comments'},()=>loadAll())
@@ -294,33 +267,60 @@ function subscribeRealtime(){
     .subscribe();
 }
 
-// ---- USER SELECTION ----
 function showSwitchUser(){
   openModal(`
     <div class="modal-head"><div class="modal-title">Seleccionar perfil</div></div>
     <div class="modal-body" style="gap:8px">
       ${DATA.users.map(u=>`
-        <div onclick="selectUser('${u.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer" onmouseenter="this.style.background='var(--accent-light)';this.style.borderColor='#a5b4fc'" onmouseleave="this.style.background='';this.style.borderColor='var(--border)'">
+        <div onclick="askPin('${u.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all .15s" onmouseenter="this.style.background='var(--accent-light)';this.style.borderColor='#a5b4fc'" onmouseleave="this.style.background='';this.style.borderColor='var(--border)'">
           <div class="avatar ${u.color}" style="width:40px;height:40px;font-size:14px">${u.initials}</div>
-          <div style="flex:1"><div style="font-weight:500;font-size:14px">${u.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${u.role==='admin'?'Administrador':'Usuario'}</div></div>
+          <div style="flex:1"><div style="font-weight:500;font-size:14px">${u.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${u.role==='admin'?'Administrador':'Usuario'} · PIN requerido</div></div>
           ${u.role==='admin'?'<span class="pill p-progress">Admin</span>':''}
         </div>`).join('')}
     </div>`,false);
 }
 
-function selectUser(id){
-  S.user=DATA.users.find(u=>u.id===id);
-  closeModal();
-  updateSidebar();
-  nav('tasks',document.getElementById('nb-tasks'));
+function askPin(userId){
+  const u=DATA.users.find(x=>x.id===userId);
+  openModal(`
+    <div class="modal-head">
+      <div class="avatar ${u.color}" style="width:36px;height:36px;font-size:13px">${u.initials}</div>
+      <div class="modal-title">${u.name}</div>
+      <button class="close-btn" onclick="showSwitchUser()">×</button>
+    </div>
+    <div class="modal-body" style="align-items:center;text-align:center">
+      <div style="font-size:13px;color:var(--text2)">Ingresa tu PIN de 4 dígitos</div>
+      <div class="pin-wrap">
+        <input class="pin-input" type="password" maxlength="1" id="p0" oninput="pinNext(this,1,'${userId}')" onkeydown="pinKey(event,this,-1)">
+        <input class="pin-input" type="password" maxlength="1" id="p1" oninput="pinNext(this,2,'${userId}')" onkeydown="pinKey(event,this,0)">
+        <input class="pin-input" type="password" maxlength="1" id="p2" oninput="pinNext(this,3,'${userId}')" onkeydown="pinKey(event,this,1)">
+        <input class="pin-input" type="password" maxlength="1" id="p3" oninput="checkPin('${userId}')" onkeydown="pinKey(event,this,2)">
+      </div>
+      <div class="error-msg" id="pin-err"></div>
+    </div>`,false);
+  setTimeout(()=>document.getElementById('p0')?.focus(),100);
+}
+
+function pinNext(el,nextIdx,userId){if(el.value.length===1&&nextIdx<=3)document.getElementById('p'+nextIdx)?.focus();}
+function pinKey(e,el,prevIdx){if(e.key==='Backspace'&&el.value===''&&prevIdx>=0)document.getElementById('p'+prevIdx)?.focus();}
+
+function checkPin(userId){
+  const pin=[0,1,2,3].map(i=>document.getElementById('p'+i)?.value||'').join('');
+  if(pin.length<4) return;
+  const u=DATA.users.find(x=>x.id===userId);
+  if(pin===(u.pin||'1234')){
+    S.user=u;closeModal();updateSidebar();nav('tasks',document.getElementById('nb-tasks'));
+  } else {
+    document.getElementById('pin-err').textContent='PIN incorrecto';
+    [0,1,2,3].forEach(i=>{const el=document.getElementById('p'+i);if(el){el.value='';el.style.borderColor='var(--red)';}});
+    setTimeout(()=>{[0,1,2,3].forEach(i=>{const el=document.getElementById('p'+i);if(el)el.style.borderColor='';});document.getElementById('pin-err').textContent='';document.getElementById('p0')?.focus();},1200);
+  }
 }
 
 function updateSidebar(){
   const u=S.user;
-  const av=document.getElementById('sb-avatar');
-  if(!av) return;
-  av.className='avatar '+(u.color||'av-user');
-  av.textContent=u.initials;
+  const av=document.getElementById('sb-avatar');if(!av) return;
+  av.className='avatar '+(u.color||'av-user');av.textContent=u.initials;
   document.getElementById('sb-name').textContent=u.name;
   document.getElementById('sb-role').textContent=u.role==='admin'?'Administrador':'Usuario';
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=u.role==='admin'?'':'none');
@@ -328,13 +328,11 @@ function updateSidebar(){
 }
 
 function updateBadges(){
-  const a=document.getElementById('bdg-all');
-  const m=document.getElementById('bdg-my');
+  const a=document.getElementById('bdg-all'),m=document.getElementById('bdg-my');
   if(a) a.textContent=DATA.tasks.length;
   if(m&&S.user) m.textContent=DATA.tasks.filter(t=>(t.assignees||[]).includes(S.user.id)).length;
 }
 
-// ---- NAVIGATION ----
 function nav(view,btn){
   if(!S.user) return;
   S.view=view;
@@ -345,8 +343,7 @@ function nav(view,btn){
 
 function renderView(){
   const titles={tasks:'Todas las tareas',my:'Mis tareas',reports:'Reportes',users:'Gestión de usuarios'};
-  const pt=document.getElementById('pg-title');
-  if(pt) pt.textContent=titles[S.view]||'';
+  const pt=document.getElementById('pg-title');if(pt) pt.textContent=titles[S.view]||'';
   const act=document.getElementById('tb-actions');
   if(act){
     if(S.view==='tasks'||S.view==='my') act.innerHTML=S.user.role==='admin'?`<button class="btn btn-primary" onclick="openNewTask()">+ Nueva tarea</button>`:'';
@@ -359,19 +356,16 @@ function renderView(){
   else if(S.view==='users') renderUsers();
 }
 
-// ---- TASKS LIST ----
 function renderTasks(tasks){
   const users=DATA.users.filter(u=>u.role==='user');
-  const c=document.getElementById('content');
-  c.innerHTML=`
+  document.getElementById('content').innerHTML=`
     <div class="filters">
       <span class="filter-label">Estado</span>
       ${['all',...STAGES].map(s=>`<button class="filter-chip ${S.fStatus===s?'active':''}" onclick="setF('s','${s}')">${s==='all'?'Todos':s}</button>`).join('')}
       <span class="filter-label" style="margin-left:8px">Persona</span>
       <button class="filter-chip ${S.fUser==='all'?'active':''}" onclick="setF('u','all')">Todos</button>
       ${users.map(u=>`<button class="filter-chip ${S.fUser===u.id?'active':''}" onclick="setF('u','${u.id}')">${u.name.split(' ')[0]}</button>`).join('')}
-    </div>
-    <div id="tlist"></div>`;
+    </div><div id="tlist"></div>`;
   renderList(tasks);
 }
 
@@ -379,37 +373,28 @@ function renderList(tasks){
   let f=tasks;
   if(S.fStatus!=='all') f=f.filter(t=>t.status===S.fStatus);
   if(S.fUser!=='all') f=f.filter(t=>(t.assignees||[]).includes(S.fUser));
-  const el=document.getElementById('tlist');
-  if(!el) return;
-  if(!f.length){el.innerHTML=`<div class="empty"><div style="font-size:36px;margin-bottom:12px">📋</div><div>Sin tareas para mostrar</div></div>`;return;}
-  el.innerHTML=f.map(t=>{
-    const comCount=(DATA.comments[t.id]||[]).length;
-    return `<div class="task-card" onclick="openTask('${t.id}')">
-      <div class="tc-header"><div class="tc-title">${t.title}</div><span class="pill ${sC(t.status)}">${t.status}</span></div>
-      <div class="tc-desc">${t.description||''}</div>
-      <div class="stage-row">${STAGES.map((s,i)=>`<div class="stage-cell ${i<t.stage?'done':i===t.stage?'active':''}">${s.substring(0,4)}</div>`).join('')}</div>
-      <div class="tc-footer">
-        <span class="pill ${pC(t.priority)}">${t.priority}</span>
-        <div class="tc-avatars">${(t.assignees||[]).map(id=>{const u=DATA.users.find(x=>x.id===id);return u?`<div class="avatar ${u.color}" style="width:20px;height:20px;font-size:8px;border:1.5px solid var(--surface)" title="${u.name}">${u.initials}</div>`:''}).join('')}</div>
-        <div class="pbar-wrap"><div class="pbar" style="width:${t.progress}%"></div></div>
-        <span>${t.progress}%</span>
-        <span style="margin-left:auto">📅 ${t.due_date}</span>
-        ${comCount?`<span>💬 ${comCount}</span>`:''}
-      </div>
-    </div>`;
-  }).join('');
+  const el=document.getElementById('tlist');if(!el) return;
+  if(!f.length){el.innerHTML=`<div class="empty"><div style="font-size:36px;margin-bottom:12px">📋</div><div>Sin tareas</div></div>`;return;}
+  el.innerHTML=f.map(t=>`<div class="task-card" onclick="openTask('${t.id}')">
+    <div class="tc-header"><div class="tc-title">${t.title}</div><span class="pill ${sC(t.status)}">${t.status}</span></div>
+    <div class="tc-desc">${t.description||''}</div>
+    <div class="stage-row">${STAGES.map((s,i)=>`<div class="stage-cell ${i<t.stage?'done':i===t.stage?'active':''}">${s.substring(0,4)}</div>`).join('')}</div>
+    <div class="tc-footer">
+      <span class="pill ${pC(t.priority)}">${t.priority}</span>
+      <div class="tc-avatars">${(t.assignees||[]).map(id=>{const u=DATA.users.find(x=>x.id===id);return u?`<div class="avatar ${u.color}" style="width:20px;height:20px;font-size:8px;border:1.5px solid var(--surface)" title="${u.name}">${u.initials}</div>`:''}).join('')}</div>
+      <div class="pbar-wrap"><div class="pbar" style="width:${t.progress}%"></div></div>
+      <span>${t.progress}%</span>
+      <span style="margin-left:auto">📅 ${fmtDue(t.due_date)}</span>
+      ${(DATA.comments[t.id]||[]).length?`<span>💬 ${(DATA.comments[t.id]||[]).length}</span>`:''}
+    </div>
+  </div>`).join('');
 }
 
-function setF(type,val){
-  if(type==='s') S.fStatus=val; else S.fUser=val;
-  renderView();
-}
+function setF(type,val){if(type==='s')S.fStatus=val;else S.fUser=val;renderView();}
 
-// ---- TASK DETAIL ----
 function openTask(id){
   curTaskId=id;
-  const t=DATA.tasks.find(x=>x.id===id);
-  if(!t) return;
+  const t=DATA.tasks.find(x=>x.id===id);if(!t) return;
   const isAdmin=S.user.role==='admin';
   const canEdit=isAdmin||(t.assignees||[]).includes(S.user.id);
   const pLogs=DATA.progress[id]||[];
@@ -437,34 +422,28 @@ function openTask(id){
   showTab('detail');
 }
 
-function switchTab(tab,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  showTab(tab);
-}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');showTab(tab);}
 
 function showTab(tab){
   const t=DATA.tasks.find(x=>x.id===curTaskId);
-  const c=document.getElementById('tab-body');
-  if(!t||!c) return;
+  const c=document.getElementById('tab-body');if(!t||!c) return;
   const pLogs=DATA.progress[t.id]||[];
   const coms=DATA.comments[t.id]||[];
   const canLog=(t.assignees||[]).includes(S.user.id)||S.user.role==='admin';
-
   if(tab==='detail'){
     c.innerHTML=`
       <div class="form-group"><div class="form-label">Descripción</div><div style="font-size:13px;color:var(--text2);line-height:1.6">${t.description||'—'}</div></div>
       <div class="form-row">
         <div class="form-group"><div class="form-label">Prioridad</div><span class="pill ${pC(t.priority)}">${t.priority}</span></div>
-        <div class="form-group"><div class="form-label">Fecha límite</div><div style="font-size:13px">📅 ${t.due_date}</div></div>
+        <div class="form-group"><div class="form-label">Fecha límite</div><div style="font-size:13px">📅 ${fmtDue(t.due_date)}</div></div>
       </div>
-      <div class="form-group"><div class="form-label">Etapa actual</div>
+      <div class="form-group"><div class="form-label">Etapa</div>
         <div class="stage-row" style="margin:4px 0">${STAGES.map((s,i)=>`<div class="stage-cell ${i<t.stage?'done':i===t.stage?'active':''}">${s}</div>`).join('')}</div>
       </div>
       <div class="form-group"><div class="form-label">Progreso — ${t.progress}%</div>
         <div class="pbar-full"><div class="pbar" style="width:${t.progress}%"></div></div>
       </div>
-      <div class="form-group"><div class="form-label">Asignados a</div>
+      <div class="form-group"><div class="form-label">Asignados</div>
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
           ${(t.assignees||[]).map(id=>{const u=DATA.users.find(x=>x.id===id);return u?`<div style="display:flex;align-items:center;gap:8px"><div class="avatar ${u.color}" style="width:26px;height:26px;font-size:10px">${u.initials}</div><span style="font-size:13px">${u.name}</span></div>`:''}).join('')}
           ${!(t.assignees||[]).length?'<span style="color:var(--text3);font-size:13px">Sin asignar</span>':''}
@@ -474,49 +453,49 @@ function showTab(tab){
     c.innerHTML=`
       <div class="sec-label">Historial de avances</div>
       ${pLogs.length?`<div class="progress-timeline">${[...pLogs].reverse().map(e=>`<div class="pt-entry"><div class="pt-dot"></div><div class="pt-meta">${fmtDate(e.created_at)} · ${uName(e.user_id)} · <span class="pill p-progress" style="font-size:10px;padding:1px 6px">${e.pct}%</span></div><div class="pt-text">${e.text}</div></div>`).join('')}</div>`
-      :`<div style="color:var(--text3);font-size:13px;margin-bottom:14px">Sin avances registrados aún.</div>`}
+      :`<div style="color:var(--text3);font-size:13px;margin-bottom:14px">Sin avances registrados.</div>`}
       ${canLog?`
         <div class="sec-label" style="margin-top:4px">Reportar avance</div>
-        <div class="form-group"><div class="form-label">Descripción del avance</div><textarea id="p-txt" placeholder="¿Qué se avanzó?"></textarea></div>
+        <div class="form-group"><div class="form-label">Descripción</div><textarea id="p-txt" placeholder="¿Qué se avanzó?"></textarea></div>
         <div class="form-row">
-          <div class="form-group"><div class="form-label">Progreso total (%)</div><input type="text" id="p-pct" value="${t.progress}" placeholder="0-100"></div>
+          <div class="form-group"><div class="form-label">Progreso (%)</div><input type="text" id="p-pct" value="${t.progress}"></div>
           <div class="form-group"><div class="form-label">Nuevo estado</div><select id="p-stat">${STAGES.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="logProgress()">Guardar avance</button>`:''}`;
+        <button class="btn btn-primary btn-sm" id="btn-log" onclick="logProgress()">Guardar avance</button>`:''}`;
   } else {
     c.innerHTML=`
       ${coms.length?[...coms].reverse().map(cm=>`<div class="comment-card"><div class="cc-header"><div class="avatar ${uCol(cm.user_id)}" style="width:24px;height:24px;font-size:9px">${uInit(cm.user_id)}</div><span class="cc-author">${uName(cm.user_id)}</span><span class="cc-date">${fmtDate(cm.created_at)}</span></div><div class="cc-text">${cm.text}</div></div>`).join('')
       :`<div style="color:var(--text3);font-size:13px;margin-bottom:12px">Sin comentarios aún.</div>`}
       <div class="sec-label" style="margin-top:8px">Añadir comentario</div>
-      <div class="form-group"><textarea id="c-txt" placeholder="Escribe tu comentario..."></textarea></div>
-      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addComment()">Publicar</button>`;
+      <textarea id="c-txt" placeholder="Escribe tu comentario..."></textarea>
+      <button class="btn btn-primary btn-sm" id="btn-com" style="margin-top:8px" onclick="addComment()">Publicar</button>`;
   }
 }
 
 async function logProgress(){
   const t=DATA.tasks.find(x=>x.id===curTaskId);
-  const txt=document.getElementById('p-txt').value.trim();
-  const pct=Math.min(100,Math.max(0,parseInt(document.getElementById('p-pct').value)||t.progress));
-  const stat=document.getElementById('p-stat').value;
-  if(!txt){toast('Escribe una descripción del avance');return;}
-  const btn=document.querySelector('#tab-body .btn-primary');
+  const txt=document.getElementById('p-txt')?.value.trim();
+  const pct=Math.min(100,Math.max(0,parseInt(document.getElementById('p-pct')?.value)||t.progress));
+  const stat=document.getElementById('p-stat')?.value;
+  if(!txt){toast('Escribe una descripción');return;}
+  const btn=document.getElementById('btn-log');
   if(btn){btn.disabled=true;btn.textContent='Guardando...';}
-  await db.from('tf_progress').insert({task_id:t.id,user_id:S.user.id,text:txt,pct});
+  const {error:e1}=await db.from('tf_progress').insert({task_id:t.id,user_id:S.user.id,text:txt,pct});
+  if(e1){toast('Error: '+e1.message);if(btn){btn.disabled=false;btn.textContent='Guardar avance';}return;}
   await db.from('tf_tasks').update({progress:pct,status:stat,stage:STAGES.indexOf(stat),updated_at:new Date().toISOString()}).eq('id',t.id);
   toast('Avance guardado');
-  // Realtime actualizará automáticamente
 }
 
 async function addComment(){
-  const txt=document.getElementById('c-txt').value.trim();
+  const txt=document.getElementById('c-txt')?.value.trim();
   if(!txt){toast('Escribe un comentario');return;}
-  const btn=document.querySelector('#tab-body .btn-primary');
+  const btn=document.getElementById('btn-com');
   if(btn){btn.disabled=true;btn.textContent='Publicando...';}
-  await db.from('tf_comments').insert({task_id:curTaskId,user_id:S.user.id,text:txt});
+  const {error}=await db.from('tf_comments').insert({task_id:curTaskId,user_id:S.user.id,text:txt});
+  if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Publicar';}return;}
   toast('Comentario publicado');
 }
 
-// ---- NEW / EDIT TASK ----
 function openNewTask(){
   const users=DATA.users.filter(u=>u.role==='user');
   openModal(`
@@ -526,29 +505,31 @@ function openNewTask(){
       <div class="form-group"><div class="form-label">Descripción</div><textarea id="nt-de" placeholder="Descripción detallada..."></textarea></div>
       <div class="form-row">
         <div class="form-group"><div class="form-label">Prioridad</div><select id="nt-pr">${PRIOS.map(p=>`<option>${p}</option>`).join('')}</select></div>
-        <div class="form-group"><div class="form-label">Fecha límite</div><input type="text" id="nt-du" placeholder="YYYY-MM-DD"></div>
+        <div class="form-group"><div class="form-label">Fecha límite</div><input type="date" id="nt-du"></div>
       </div>
       <div class="form-group"><div class="form-label">Asignar a</div>
         <div class="checkbox-list">${users.map(u=>`<label><input type="checkbox" value="${u.id}" class="ac"> <div class="avatar ${u.color}" style="width:22px;height:22px;font-size:9px">${u.initials}</div> ${u.name}</label>`).join('')}</div>
       </div>
     </div>
-    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="createTask()">Crear tarea</button></div>`);
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="btn-create" onclick="createTask()">Crear tarea</button></div>`);
 }
 
 async function createTask(){
   const ti=document.getElementById('nt-ti').value.trim();
   if(!ti){toast('El título es obligatorio');return;}
-  const assignees=[...document.querySelectorAll('.ac:checked')].map(e=>e.value);
-  await db.from('tf_tasks').insert({
-    id:'t'+Date.now(),title:ti,
+  const btn=document.getElementById('btn-create');
+  if(btn){btn.disabled=true;btn.textContent='Creando...';}
+  const {error}=await db.from('tf_tasks').insert({
+    id:uid(),title:ti,
     description:document.getElementById('nt-de').value||'',
     status:'Pendiente',priority:document.getElementById('nt-pr').value,
-    assignees,stage:0,progress:0,
+    assignees:[...document.querySelectorAll('.ac:checked')].map(e=>e.value),
+    stage:0,progress:0,
     due_date:document.getElementById('nt-du').value||'—',
     created_by:S.user.id
   });
-  closeModal();
-  toast('Tarea creada');
+  if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear tarea';}return;}
+  closeModal();toast('Tarea creada');
 }
 
 function openEditTask(id){
@@ -564,48 +545,42 @@ function openEditTask(id){
         <div class="form-group"><div class="form-label">Prioridad</div><select id="et-pr">${PRIOS.map(p=>`<option ${p===t.priority?'selected':''}>${p}</option>`).join('')}</select></div>
         <div class="form-group"><div class="form-label">Estado</div><select id="et-st">${STAGES.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></div>
       </div>
-      <div class="form-group"><div class="form-label">Fecha límite</div><input type="text" id="et-du" value="${t.due_date||''}"></div>
+      <div class="form-group"><div class="form-label">Fecha límite</div><input type="date" id="et-du" value="${t.due_date&&t.due_date!=='—'?t.due_date:''}"></div>
       <div class="form-group"><div class="form-label">Asignar a</div>
         <div class="checkbox-list">${users.map(u=>`<label><input type="checkbox" value="${u.id}" class="ac" ${(t.assignees||[]).includes(u.id)?'checked':''}> <div class="avatar ${u.color}" style="width:22px;height:22px;font-size:9px">${u.initials}</div> ${u.name}</label>`).join('')}</div>
       </div>
     </div>
-    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveTask('${t.id}')">Guardar cambios</button></div>`);
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="btn-save" onclick="saveTask('${t.id}')">Guardar</button></div>`);
 }
 
 async function saveTask(id){
-  const assignees=[...document.querySelectorAll('.ac:checked')].map(e=>e.value);
+  const btn=document.getElementById('btn-save');
+  if(btn){btn.disabled=true;btn.textContent='Guardando...';}
   const stat=document.getElementById('et-st').value;
-  await db.from('tf_tasks').update({
+  const {error}=await db.from('tf_tasks').update({
     title:document.getElementById('et-ti').value,
     description:document.getElementById('et-de').value,
     priority:document.getElementById('et-pr').value,
     status:stat,stage:STAGES.indexOf(stat),
-    due_date:document.getElementById('et-du').value,
-    assignees,updated_at:new Date().toISOString()
+    due_date:document.getElementById('et-du').value||'—',
+    assignees:[...document.querySelectorAll('.ac:checked')].map(e=>e.value),
+    updated_at:new Date().toISOString()
   }).eq('id',id);
-  closeModal();
-  toast('Tarea actualizada');
+  if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Guardar';}return;}
+  closeModal();toast('Tarea actualizada');
 }
 
 async function deleteTask(id){
-  if(!confirm('¿Eliminar esta tarea? No se puede deshacer.')) return;
+  if(!confirm('¿Eliminar esta tarea?')) return;
   await db.from('tf_tasks').delete().eq('id',id);
-  closeModal();
-  toast('Tarea eliminada');
+  closeModal();toast('Tarea eliminada');
 }
 
-// ---- REPORTS ----
 function renderReports(){
-  const c=document.getElementById('content');
-  c.innerHTML=`<div class="tabs"><button class="tab active" onclick="sRT('general',this)">General</button><button class="tab" onclick="sRT('bytask',this)">Por tarea</button><button class="tab" onclick="sRT('byuser',this)">Por usuario</button></div><div id="rc"></div>`;
+  document.getElementById('content').innerHTML=`<div class="tabs"><button class="tab active" onclick="sRT('general',this)">General</button><button class="tab" onclick="sRT('bytask',this)">Por tarea</button><button class="tab" onclick="sRT('byuser',this)">Por usuario</button></div><div id="rc"></div>`;
   showRT('general');
 }
-
-function sRT(tab,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');showRT(tab);
-}
-
+function sRT(tab,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');showRT(tab);}
 function showRT(tab){
   const c=document.getElementById('rc');if(!c) return;
   const tasks=DATA.tasks;const total=tasks.length;
@@ -619,8 +594,8 @@ function showRT(tab){
       <div class="stat-card"><div class="stat-num">${byS['Bloqueada']||0}</div><div class="stat-label">Bloqueadas</div></div>
       <div class="stat-card"><div class="stat-num">${avg}%</div><div class="stat-label">Avance prom.</div></div>
     </div>
-    <div class="sec-label">Distribución por estado</div>
-    <table class="data-table"><thead><tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>
+    <div class="sec-label">Por estado</div>
+    <table class="data-table"><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>
     ${STAGES.map(s=>`<tr><td><span class="pill ${sC(s)}">${s}</span></td><td>${byS[s]||0}</td><td>${total?Math.round((byS[s]||0)*100/total):0}%</td></tr>`).join('')}
     </tbody></table>`;
   } else if(tab==='bytask'){
@@ -628,7 +603,7 @@ function showRT(tab){
     ${tasks.map(t=>`<tr><td style="font-weight:500">${t.title}</td><td><span class="pill ${sC(t.status)}" style="font-size:10px">${t.status}</span></td>
     <td><div style="display:flex;align-items:center;gap:6px"><div class="pbar-wrap" style="width:60px;height:6px"><div class="pbar" style="height:6px;width:${t.progress}%"></div></div>${t.progress}%</div></td>
     <td style="font-size:12px">${(t.assignees||[]).map(id=>uName(id).split(' ')[0]).join(', ')||'—'}</td>
-    <td style="font-size:12px;font-family:'DM Mono',monospace">${t.due_date}</td></tr>`).join('')}
+    <td style="font-size:12px">${fmtDue(t.due_date)}</td></tr>`).join('')}
     </tbody></table>`;
   } else {
     const users=DATA.users.filter(u=>u.role==='user');
@@ -643,22 +618,25 @@ function showRT(tab){
   }
 }
 
-// ---- USERS ----
 function renderUsers(){
-  const c=document.getElementById('content');
   const users=DATA.users.filter(u=>u.id!=='admin');
-  c.innerHTML=`<div class="stat-grid" style="max-width:280px;margin-bottom:20px">
-    <div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">Usuarios</div></div>
-    <div class="stat-card"><div class="stat-num">${DATA.tasks.length}</div><div class="stat-label">Tareas</div></div>
-  </div>
-  <div class="sec-label">Usuarios del sistema</div>
-  <table class="data-table"><thead><tr><th>Usuario</th><th>Email</th><th>Tareas</th><th></th></tr></thead><tbody>
-  ${users.map(u=>{
-    const n=DATA.tasks.filter(t=>(t.assignees||[]).includes(u.id)).length;
-    return `<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar ${u.color}" style="width:30px;height:30px;font-size:11px">${u.initials}</div><span style="font-weight:500">${u.name}</span></div></td>
-    <td style="color:var(--text2)">${u.email}</td><td>${n}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Eliminar</button></td></tr>`;
-  }).join('')}</tbody></table>`;
+  document.getElementById('content').innerHTML=`
+    <div class="stat-grid" style="max-width:280px;margin-bottom:20px">
+      <div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">Usuarios</div></div>
+      <div class="stat-card"><div class="stat-num">${DATA.tasks.length}</div><div class="stat-label">Tareas</div></div>
+    </div>
+    <div class="sec-label">Usuarios del sistema</div>
+    <table class="data-table"><thead><tr><th>Usuario</th><th>Email</th><th>PIN</th><th>Tareas</th><th></th></tr></thead><tbody>
+    ${users.map(u=>{
+      const n=DATA.tasks.filter(t=>(t.assignees||[]).includes(u.id)).length;
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar ${u.color}" style="width:30px;height:30px;font-size:11px">${u.initials}</div><span style="font-weight:500">${u.name}</span></div></td>
+        <td style="color:var(--text2)">${u.email}</td>
+        <td><span style="font-family:'DM Mono',monospace">${u.pin||'1234'}</span> <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;margin-left:6px" onclick="editPin('${u.id}')">cambiar</button></td>
+        <td>${n}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Eliminar</button></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 function openNewUser(){
@@ -667,40 +645,54 @@ function openNewUser(){
     <div class="modal-body">
       <div class="form-group"><div class="form-label">Nombre completo *</div><input type="text" id="nu-na" placeholder="Nombre Apellido"></div>
       <div class="form-group"><div class="form-label">Email *</div><input type="text" id="nu-em" placeholder="usuario@empresa.com"></div>
+      <div class="form-group"><div class="form-label">PIN de acceso (4 dígitos)</div><input type="text" id="nu-pi" placeholder="1234" maxlength="4" style="font-family:'DM Mono',monospace;letter-spacing:6px;font-size:20px;text-align:center"></div>
     </div>
-    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="createUser()">Crear</button></div>`);
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="btn-nu" onclick="createUser()">Crear usuario</button></div>`);
 }
 
 async function createUser(){
   const name=document.getElementById('nu-na').value.trim();
   const email=document.getElementById('nu-em').value.trim();
-  if(!name||!email){toast('Completa todos los campos');return;}
+  const pin=document.getElementById('nu-pi').value.trim()||'1234';
+  if(!name||!email){toast('Completa nombre y email');return;}
+  if(!/^\d{4}$/.test(pin)){toast('El PIN debe ser 4 dígitos numéricos');return;}
+  const btn=document.getElementById('btn-nu');
+  if(btn){btn.disabled=true;btn.textContent='Creando...';}
   const parts=name.split(' ');
   const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
-  const {error}=await db.from('tf_users').insert({id:'u'+Date.now(),name,email,role:'user',initials,color:'av-user'});
-  if(error){toast('Error: '+error.message);return;}
+  const {error}=await db.from('tf_users').insert({id:uid(),name,email,role:'user',initials,color:'av-user',pin});
+  if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear usuario';}return;}
   closeModal();toast('Usuario creado');
+}
+
+function editPin(userId){
+  const u=DATA.users.find(x=>x.id===userId);
+  openModal(`
+    <div class="modal-head"><div class="modal-title">Cambiar PIN — ${u.name}</div><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><div class="form-label">Nuevo PIN (4 dígitos)</div>
+        <input type="text" id="new-pin" placeholder="0000" maxlength="4" style="font-family:'DM Mono',monospace;letter-spacing:6px;font-size:24px;text-align:center">
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="savePin('${userId}')">Guardar PIN</button></div>`);
+}
+
+async function savePin(userId){
+  const pin=document.getElementById('new-pin').value.trim();
+  if(!/^\d{4}$/.test(pin)){toast('El PIN debe ser exactamente 4 dígitos');return;}
+  const {error}=await db.from('tf_users').update({pin}).eq('id',userId);
+  if(error){toast('Error: '+error.message);return;}
+  closeModal();toast('PIN actualizado');
 }
 
 async function deleteUser(id){
   const u=DATA.users.find(x=>x.id===id);
   if(!u||!confirm(`¿Eliminar a ${u.name}?`)) return;
-  // Quitar de asignaciones
   const affected=DATA.tasks.filter(t=>(t.assignees||[]).includes(id));
-  for(const t of affected){
-    await db.from('tf_tasks').update({assignees:t.assignees.filter(a=>a!==id)}).eq('id',t.id);
-  }
+  for(const t of affected) await db.from('tf_tasks').update({assignees:t.assignees.filter(a=>a!==id)}).eq('id',t.id);
   await db.from('tf_users').delete().eq('id',id);
   toast('Usuario eliminado');
 }
-
-// ---- HELPERS ----
-const sC=s=>({Pendiente:'p-pending','En progreso':'p-progress','En revisión':'p-review',Completada:'p-done',Bloqueada:'p-blocked'}[s]||'p-pending');
-const pC=p=>({Baja:'p-low',Media:'p-med',Alta:'p-high'}[p]||'p-low');
-const uName=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.name:id;};
-const uInit=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.initials:'?';};
-const uCol=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.color:'av-user';};
-const fmtDate=iso=>{try{return new Date(iso).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});}catch{return iso;}};
 
 function openModal(html,closeable=true){
   const o=document.getElementById('overlay');
@@ -708,17 +700,8 @@ function openModal(html,closeable=true){
   o.style.display='flex';
   o.onclick=closeable?e=>{if(e.target===o)closeModal();}:null;
 }
-
-function closeModal(){
-  const o=document.getElementById('overlay');
-  o.style.display='none';o.innerHTML='';
-}
-
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
+function closeModal(){const o=document.getElementById('overlay');o.style.display='none';o.innerHTML='';}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 init();
 </script>
