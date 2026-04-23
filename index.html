@@ -183,6 +183,7 @@ const uInit=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.initials:'?';}
 const uCol=id=>{const u=DATA.users.find(x=>x.id===id);return u?u.color:'av-user';};
 const fmtDate=iso=>{try{return new Date(iso).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});}catch{return iso;}};
 const fmtDue=s=>{if(!s||s==='—')return '—';const p=s.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s;};
+const toIsoDate=s=>{if(!s||s==='—')return null;if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const p=s.split(/[/\-]/);if(p.length===3&&p[2].length===4)return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;return s;};
 
 async function init(){
   renderApp();
@@ -199,10 +200,13 @@ function renderApp(){
         <div class="logo-text">Task<em>Flow</em></div>
         <div class="sync-status" id="sync-status">Conectando...</div>
       </div>
-      <div class="user-card" onclick="showSwitchUser()">
-        <div class="avatar" id="sb-avatar"></div>
-        <div class="user-info"><div class="user-name" id="sb-name">—</div><div class="user-role" id="sb-role">—</div></div>
-        <button class="switch-link" onclick="event.stopPropagation();showSwitchUser()">cambiar</button>
+      <div class="user-card">
+        <div class="avatar" id="sb-avatar" onclick="showSwitchUser()" style="cursor:pointer"></div>
+        <div class="user-info" onclick="showSwitchUser()" style="cursor:pointer"><div class="user-name" id="sb-name">—</div><div class="user-role" id="sb-role">—</div></div>
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+          <button class="switch-link" onclick="showSwitchUser()">cambiar</button>
+          <button class="switch-link" style="color:var(--text3)" onclick="editMyPin()">mi PIN</button>
+        </div>
       </div>
       <nav class="nav">
         <div class="nav-group-label">Principal</div>
@@ -482,7 +486,7 @@ async function logProgress(){
   if(btn){btn.disabled=true;btn.textContent='Guardando...';}
   const {error:e1}=await db.from('tf_progress').insert({task_id:t.id,user_id:S.user.id,text:txt,pct});
   if(e1){toast('Error: '+e1.message);if(btn){btn.disabled=false;btn.textContent='Guardar avance';}return;}
-  await db.from('tf_tasks').update({progress:pct,status:stat,stage:STAGES.indexOf(stat),updated_at:new Date().toISOString()}).eq('id',t.id);
+  await db.from('tf_tasks').update({progress:pct,status:stat,stage:STAGES.indexOf(stat),}).eq('id',t.id);
   toast('Avance guardado');
 }
 
@@ -564,7 +568,7 @@ async function saveTask(id){
     status:stat,stage:STAGES.indexOf(stat),
     due_date:document.getElementById('et-du').value||'—',
     assignees:[...document.querySelectorAll('.ac:checked')].map(e=>e.value),
-    updated_at:new Date().toISOString()
+    
   }).eq('id',id);
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Guardar';}return;}
   closeModal();toast('Tarea actualizada');
@@ -665,24 +669,48 @@ async function createUser(){
   closeModal();toast('Usuario creado');
 }
 
+function editMyPin(){
+  if(!S.user){toast('Selecciona un perfil primero');return;}
+  editPin(S.user.id);
+}
+
 function editPin(userId){
   const u=DATA.users.find(x=>x.id===userId);
   openModal(`
     <div class="modal-head"><div class="modal-title">Cambiar PIN — ${u.name}</div><button class="close-btn" onclick="closeModal()">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><div class="form-label">Nuevo PIN (4 dígitos)</div>
-        <input type="text" id="new-pin" placeholder="0000" maxlength="4" style="font-family:'DM Mono',monospace;letter-spacing:6px;font-size:24px;text-align:center">
+    <div class="modal-body" style="align-items:center;text-align:center">
+      <div style="font-size:13px;color:var(--text2)">PIN actual</div>
+      <div class="pin-wrap">
+        <input class="pin-input" type="password" maxlength="1" id="op0" oninput="if(this.value)document.getElementById('op1').focus()">
+        <input class="pin-input" type="password" maxlength="1" id="op1" oninput="if(this.value)document.getElementById('op2').focus()" onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('op0').focus()">
+        <input class="pin-input" type="password" maxlength="1" id="op2" oninput="if(this.value)document.getElementById('op3').focus()" onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('op1').focus()">
+        <input class="pin-input" type="password" maxlength="1" id="op3" onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('op2').focus()">
       </div>
+      <div style="font-size:13px;color:var(--text2);margin-top:8px">Nuevo PIN</div>
+      <div class="pin-wrap">
+        <input class="pin-input" type="password" maxlength="1" id="np0" oninput="if(this.value)document.getElementById('np1').focus()">
+        <input class="pin-input" type="password" maxlength="1" id="np1" oninput="if(this.value)document.getElementById('np2').focus()" onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('np0').focus()">
+        <input class="pin-input" type="password" maxlength="1" id="np2" oninput="if(this.value)document.getElementById('np3').focus()" onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('np1').focus()">
+        <input class="pin-input" type="password" maxlength="1" id="np3" onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('np2').focus()">
+      </div>
+      <div class="error-msg" id="pin-chg-err"></div>
     </div>
     <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="savePin('${userId}')">Guardar PIN</button></div>`);
+  setTimeout(()=>document.getElementById('op0')?.focus(),100);
 }
 
 async function savePin(userId){
-  const pin=document.getElementById('new-pin').value.trim();
-  if(!/^\d{4}$/.test(pin)){toast('El PIN debe ser exactamente 4 dígitos');return;}
-  const {error}=await db.from('tf_users').update({pin}).eq('id',userId);
-  if(error){toast('Error: '+error.message);return;}
-  closeModal();toast('PIN actualizado');
+  const u=DATA.users.find(x=>x.id===userId);
+  const oldPin=[0,1,2,3].map(i=>document.getElementById('op'+i)?.value||'').join('');
+  const newPin=[0,1,2,3].map(i=>document.getElementById('np'+i)?.value||'').join('');
+  const errEl=document.getElementById('pin-chg-err');
+  if(oldPin!==(u.pin||'1234')){if(errEl)errEl.textContent='PIN actual incorrecto';return;}
+  if(!/^\d{4}$/.test(newPin)){if(errEl)errEl.textContent='El nuevo PIN debe ser 4 dígitos';return;}
+  const {error}=await db.from('tf_users').update({pin:newPin}).eq('id',userId);
+  if(error){toast('Error al guardar: '+error.message);console.error(error);return;}
+  // Actualizar en memoria
+  if(S.user&&S.user.id===userId) S.user.pin=newPin;
+  closeModal();toast('PIN actualizado correctamente');
 }
 
 async function deleteUser(id){
