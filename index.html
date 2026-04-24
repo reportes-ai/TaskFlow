@@ -268,7 +268,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.8</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.9</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -711,7 +711,7 @@ function renderUsers(){
         <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar ${u.color}" style="width:30px;height:30px;font-size:11px">${u.initials}</div><div><div style="font-weight:500">${u.name}</div>${deps.length?`<div style="font-size:10px;color:var(--text3)">Supervisa a: ${deps.map(d=>d.name.split(' ')[0]).join(', ')}</div>`:''}</div></div></td>
         <td style="font-size:12px"><span class="pill p-low">${u.area||'—'}</span></td>
         <td style="color:var(--text2);font-size:12px">${sup?`<div style="display:flex;align-items:center;gap:6px"><div class="avatar ${sup.color}" style="width:20px;height:20px;font-size:8px">${sup.initials}</div>${sup.name}</div>`:'<span style="color:var(--text3)">—</span>'}</td>
-        <td><span style="font-family:'DM Mono',monospace">${u.pin||'1234'}</span> <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;margin-left:6px" onclick="editPin('${u.id}')">cambiar</button></td>
+        <td><span style="font-family:'DM Mono',monospace">${u.pin||'1234'}</span> <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;margin-left:6px" onclick="editPin('${u.id}',true)">cambiar</button></td>
         <td>${n}</td>
         <td style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openEditUser('${u.id}')">Editar</button><button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Eliminar</button></td>
       </tr>`;
@@ -838,18 +838,19 @@ function editPin(userId){
   setTimeout(()=>document.getElementById('op0')?.focus(),100);
 }
 
-async function savePin(userId){
+async function savePin(userId, adminOverride=false){
   const u=DATA.users.find(x=>x.id===userId);
-  const oldPin=[0,1,2,3].map(i=>document.getElementById('op'+i)?.value||'').join('');
   const newPin=[0,1,2,3].map(i=>document.getElementById('np'+i)?.value||'').join('');
   const errEl=document.getElementById('pin-chg-err');
-  if(oldPin!==(u.pin||'1234')){if(errEl)errEl.textContent='PIN actual incorrecto';return;}
+  if(!adminOverride){
+    const oldPin=[0,1,2,3].map(i=>document.getElementById('op'+i)?.value||'').join('');
+    if(oldPin!==(u.pin||'1234')){if(errEl)errEl.textContent='PIN actual incorrecto';return;}
+  }
   if(!/^\d{4}$/.test(newPin)){if(errEl)errEl.textContent='El nuevo PIN debe ser 4 dígitos';return;}
   const {error}=await db.from('tf_users').update({pin:newPin}).eq('id',userId);
   if(error){toast('Error al guardar: '+error.message);console.error(error);return;}
-  // Actualizar en memoria
   if(S.user&&S.user.id===userId) S.user.pin=newPin;
-  closeModal();toast('PIN actualizado correctamente');
+  closeModal();toast('PIN actualizado correctamente');await loadAll();
 }
 
 async function deleteUser(id){
