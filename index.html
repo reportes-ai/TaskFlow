@@ -186,18 +186,9 @@ function visibleTasks(){
   const u=S.user;
   if(!u) return [];
   if(u.role==='admin') return DATA.tasks;
-  const directReports=DATA.users.filter(x=>x.supervisor_id===u.id).map(x=>x.id);
   return DATA.tasks.filter(t=>{
-    const assignees=t.assignees||[];
-    // Creó la tarea
     if(t.created_by===u.id) return true;
-    // Está asignado
-    if(assignees.includes(u.id)) return true;
-    // Es tarea de un dependiente directo (creada por o asignada a)
-    if(directReports.length){
-      if(directReports.includes(t.created_by)) return true;
-      if(directReports.some(rid=>assignees.includes(rid))) return true;
-    }
+    if((t.assignees||[]).includes(u.id)) return true;
     return false;
   });
 }
@@ -276,7 +267,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.3</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.4</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -367,7 +358,7 @@ function nav(view,btn){
 }
 
 function renderView(){
-  const titles={tasks:S.user&&S.user.role!=='admin'&&DATA.users.some(x=>x.supervisor_id===S.user.id)?'Mi equipo':'Todas las tareas',my:'Mis tareas',reports:'Reportes',users:'Gestión de usuarios'};
+  const titles={tasks:S.user&&S.user.role==='admin'?'Todas las tareas':'Mis tareas',my:'Tareas asignadas a mí',reports:'Reportes',users:'Gestión de usuarios'};
   const pt=document.getElementById('pg-title');if(pt) pt.textContent=titles[S.view]||'';
   const act=document.getElementById('tb-actions');
   if(act){
