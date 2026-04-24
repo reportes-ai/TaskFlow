@@ -268,7 +268,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.9</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.0</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -509,7 +509,7 @@ async function logProgress(){
   const {error:e1}=await db.from('tf_progress').insert({task_id:t.id,user_id:S.user.id,text:txt,pct});
   if(e1){toast('Error: '+e1.message);if(btn){btn.disabled=false;btn.textContent='Guardar avance';}return;}
   await db.from('tf_tasks').update({progress:pct,status:stat,stage:STAGES.indexOf(stat),}).eq('id',t.id);
-  toast('Avance guardado');await loadAll();
+  closeModal();toast("Avance guardado");await loadAll();
 }
 
 async function addComment(){
@@ -519,7 +519,7 @@ async function addComment(){
   if(btn){btn.disabled=true;btn.textContent='Publicando...';}
   const {error}=await db.from('tf_comments').insert({task_id:curTaskId,user_id:S.user.id,text:txt});
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Publicar';}return;}
-  toast('Comentario publicado');await loadAll();
+  closeModal();toast("Comentario publicado");await loadAll();
 }
 
 function openNewTask(){
