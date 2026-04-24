@@ -268,7 +268,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.6</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.7</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -724,12 +724,6 @@ function openEditUser(userId){
       <div class="form-group"><div class="form-label">Nombre completo *</div><input type="text" id="eu-na" value="${u.name}"></div>
       <div class="form-group"><div class="form-label">Email *</div><input type="text" id="eu-em" value="${u.email}"></div>
       <div class="form-group"><div class="form-label">Área *</div>
-        <select id="nu-area">
-          <option value="">— Selecciona un área —</option>
-          ${AREAS.map(a=>`<option value="${a}">${a}</option>`).join('')}
-        </select>
-      </div>
-      <div class="form-group"><div class="form-label">Área *</div>
         <select id="eu-area">
           <option value="">— Selecciona un área —</option>
           ${AREAS.map(a=>`<option value="${a}" ${u.area===a?'selected':''}>${a}</option>`).join('')}
@@ -753,14 +747,14 @@ async function saveEditUser(userId){
   const email=document.getElementById('eu-em').value.trim();
   const supId=document.getElementById('eu-sup').value||null;
   const pin=document.getElementById('eu-pi').value.trim();
+  const area=document.getElementById('eu-area').value;
   if(!name||!email){toast('Completa nombre y email');return;}
+  if(!area){toast('Selecciona un área');return;}
   if(pin&&!/^\d{4}$/.test(pin)){toast('El PIN debe ser 4 dígitos');return;}
   const btn=document.getElementById('btn-eu');
   if(btn){btn.disabled=true;btn.textContent='Guardando...';}
   const parts=name.split(' ');
   const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
-  const area=document.getElementById('eu-area').value;
-  if(!area){toast('Selecciona un área');return;}
   const updates={name,email,initials,supervisor_id:supId,area};
   if(pin) updates.pin=pin;
   const {error}=await db.from('tf_users').update(updates).eq('id',userId);
@@ -776,6 +770,12 @@ function openNewUser(){
     <div class="modal-body">
       <div class="form-group"><div class="form-label">Nombre completo *</div><input type="text" id="nu-na" placeholder="Nombre Apellido"></div>
       <div class="form-group"><div class="form-label">Email *</div><input type="text" id="nu-em" placeholder="usuario@empresa.com"></div>
+      <div class="form-group"><div class="form-label">Área *</div>
+        <select id="nu-area">
+          <option value="">— Selecciona un área —</option>
+          ${AREAS.map(a=>`<option value="${a}">${a}</option>`).join('')}
+        </select>
+      </div>
       <div class="form-group"><div class="form-label">Supervisor directo</div>
         <select id="nu-sup">
           <option value="">— Sin supervisor (nivel raíz) —</option>
