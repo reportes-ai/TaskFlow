@@ -267,7 +267,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.4</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.5</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -593,18 +593,75 @@ async function deleteTask(id){
 }
 
 function renderReports(){
-  document.getElementById('content').innerHTML=`<div class="tabs"><button class="tab active" onclick="sRT('general',this)">General</button><button class="tab" onclick="sRT('bytask',this)">Por tarea</button><button class="tab" onclick="sRT('byuser',this)">Por usuario</button></div><div id="rc"></div>`;
-  showRT('general');
+  document.getElementById('content').innerHTML=`<div class="tabs"><button class="tab active" onclick="sRT('mytasks',this)">Mis tareas</button><button class="tab" onclick="sRT('general',this)">General</button><button class="tab" onclick="sRT('byuser',this)">Por usuario</button></div><div id="rc"></div>`;
+  showRT('mytasks');
 }
 function sRT(tab,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');showRT(tab);}
+
+function reportTaskRow(t){
+  const pLogs=DATA.progress[t.id]||[];
+  const coms=DATA.comments[t.id]||[];
+  const rowId='rpt-'+t.id;
+  return `<div style="border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden">
+    <div onclick="toggleRptRow('${rowId}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;background:var(--surface);transition:background .15s" onmouseenter="this.style.background='var(--surface2)'" onmouseleave="this.style.background='var(--surface)'">
+      <div style="flex:1">
+        <div style="font-weight:500;font-size:13px">${t.title} <span style="font-size:11px;color:var(--text3);font-weight:400">— ${uName(t.created_by||'')}</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${(t.assignees||[]).map(id=>uName(id).split(' ')[0]).join(', ')||'Sin asignar'} · 📅 ${fmtDue(t.due_date)}</div>
+      </div>
+      <span class="pill ${sC(t.status)}" style="font-size:10px">${t.status}</span>
+      <div style="display:flex;align-items:center;gap:6px;min-width:80px">
+        <div class="pbar-wrap" style="width:50px;height:5px"><div class="pbar" style="height:5px;width:${t.progress}%"></div></div>
+        <span style="font-size:11px;color:var(--text3)">${t.progress}%</span>
+      </div>
+      <span style="font-size:16px;color:var(--text3)" id="arr-${rowId}">▸</span>
+    </div>
+    <div id="${rowId}" style="display:none;border-top:1px solid var(--border);background:var(--surface2);padding:14px 16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div class="sec-label" style="margin-bottom:8px">Avances (${pLogs.length})</div>
+          ${pLogs.length?`<div style="border-left:2px solid var(--border);padding-left:10px">${[...pLogs].reverse().map(e=>`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace">${fmtDate(e.created_at)} · ${uName(e.user_id)} · <span class="pill p-progress" style="font-size:9px;padding:1px 5px">${e.pct}%</span></div><div style="font-size:12px;margin-top:2px">${e.text}</div></div>`).join('')}</div>`
+          :'<div style="font-size:12px;color:var(--text3)">Sin avances registrados</div>'}
+        </div>
+        <div>
+          <div class="sec-label" style="margin-bottom:8px">Comentarios (${coms.length})</div>
+          ${coms.length?[...coms].reverse().map(cm=>`<div style="margin-bottom:8px;padding:8px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:3px">${uName(cm.user_id)} · ${fmtDate(cm.created_at)}</div><div style="font-size:12px">${cm.text}</div></div>`).join('')
+          :'<div style="font-size:12px;color:var(--text3)">Sin comentarios</div>'}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleRptRow(id){
+  const el=document.getElementById(id);
+  const arr=document.getElementById('arr-'+id);
+  if(!el) return;
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  if(arr) arr.textContent=open?'▾':'▸';
+}
+
 function showRT(tab){
   const c=document.getElementById('rc');if(!c) return;
-  const tasks=DATA.tasks;const total=tasks.length;
-  const byS={};STAGES.forEach(s=>byS[s]=0);tasks.forEach(t=>byS[t.status]=(byS[t.status]||0)+1);
-  if(tab==='general'){
+  const isAdmin=S.user.role==='admin';
+  const myTasks=isAdmin?DATA.tasks:DATA.tasks.filter(t=>t.created_by===S.user.id||(t.assignees||[]).includes(S.user.id));
+
+  if(tab==='mytasks'){
+    const created=myTasks.filter(t=>t.created_by===S.user.id&&!(t.assignees||[]).includes(S.user.id));
+    const assigned=myTasks.filter(t=>(t.assignees||[]).includes(S.user.id));
+    const both=myTasks.filter(t=>t.created_by===S.user.id&&(t.assignees||[]).includes(S.user.id));
+    c.innerHTML=`
+      ${isAdmin?`<div class="sec-label">Todas las tareas (${myTasks.length})</div>${myTasks.map(t=>reportTaskRow(t)).join('')}`:`
+      ${both.length?`<div class="sec-label">Creadas por mí y asignadas a mí (${both.length})</div>${both.map(t=>reportTaskRow(t)).join('')}`:''}
+      ${created.length?`<div class="sec-label" style="margin-top:${both.length?'16px':'0'}">Tareas que creé (${created.length})</div>${created.map(t=>reportTaskRow(t)).join('')}`:''}
+      ${assigned.length?`<div class="sec-label" style="margin-top:${created.length||both.length?'16px':'0'}">Tareas asignadas a mí (${assigned.length})</div>${assigned.map(t=>reportTaskRow(t)).join('')}`:''}
+      ${!myTasks.length?'<div class="empty"><div style="font-size:32px;margin-bottom:12px">📋</div><div>No tienes tareas aún</div></div>':''}`}`;
+  } else if(tab==='general'){
+    const tasks=myTasks;const total=tasks.length;
+    const byS={};STAGES.forEach(s=>byS[s]=0);tasks.forEach(t=>byS[t.status]=(byS[t.status]||0)+1);
     const avg=total?Math.round(tasks.reduce((a,t)=>a+t.progress,0)/total):0;
     c.innerHTML=`<div class="stat-grid">
-      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total tareas</div></div>
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
       <div class="stat-card"><div class="stat-num">${byS['Completada']||0}</div><div class="stat-label">Completadas</div></div>
       <div class="stat-card"><div class="stat-num">${byS['En progreso']||0}</div><div class="stat-label">En progreso</div></div>
       <div class="stat-card"><div class="stat-num">${byS['Bloqueada']||0}</div><div class="stat-label">Bloqueadas</div></div>
@@ -614,18 +671,11 @@ function showRT(tab){
     <table class="data-table"><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>
     ${STAGES.map(s=>`<tr><td><span class="pill ${sC(s)}">${s}</span></td><td>${byS[s]||0}</td><td>${total?Math.round((byS[s]||0)*100/total):0}%</td></tr>`).join('')}
     </tbody></table>`;
-  } else if(tab==='bytask'){
-    c.innerHTML=`<table class="data-table"><thead><tr><th>Tarea</th><th>Estado</th><th>Progreso</th><th>Asignados</th><th>Vence</th></tr></thead><tbody>
-    ${tasks.map(t=>`<tr><td style="font-weight:500">${t.title}</td><td><span class="pill ${sC(t.status)}" style="font-size:10px">${t.status}</span></td>
-    <td><div style="display:flex;align-items:center;gap:6px"><div class="pbar-wrap" style="width:60px;height:6px"><div class="pbar" style="height:6px;width:${t.progress}%"></div></div>${t.progress}%</div></td>
-    <td style="font-size:12px">${(t.assignees||[]).map(id=>uName(id).split(' ')[0]).join(', ')||'—'}</td>
-    <td style="font-size:12px">${fmtDue(t.due_date)}</td></tr>`).join('')}
-    </tbody></table>`;
   } else {
     const users=DATA.users.filter(u=>u.role==='user');
     c.innerHTML=`<table class="data-table"><thead><tr><th>Usuario</th><th>Asignadas</th><th>Completadas</th><th>En progreso</th><th>Avance prom.</th></tr></thead><tbody>
     ${users.map(u=>{
-      const mine=tasks.filter(t=>(t.assignees||[]).includes(u.id));
+      const mine=DATA.tasks.filter(t=>(t.assignees||[]).includes(u.id));
       const done=mine.filter(t=>t.status==='Completada').length;
       const prog=mine.filter(t=>t.status==='En progreso').length;
       const avg=mine.length?Math.round(mine.reduce((a,t)=>a+t.progress,0)/mine.length):0;
