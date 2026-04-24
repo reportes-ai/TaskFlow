@@ -1,0 +1,30 @@
+name: Notificar nueva tarea
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  notificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependencias
+        run: npm install @supabase/supabase-js nodemailer
+        working-directory: .github/workflows/scripts
+
+      - name: Enviar notificaciones
+        env:
+          SUPABASE_URL: https://wvjzzefvimaegrphixdq.supabase.co
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GMAIL_USER: autofacilreportes@gmail.com
+          GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+        run: node .github/workflows/scripts/notificar-tarea.js
