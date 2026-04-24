@@ -186,13 +186,18 @@ function visibleTasks(){
   const u=S.user;
   if(!u) return [];
   if(u.role==='admin') return DATA.tasks;
-  // Direct reports
   const directReports=DATA.users.filter(x=>x.supervisor_id===u.id).map(x=>x.id);
-  // Visible = tasks where user participates OR tasks where any direct report participates
   return DATA.tasks.filter(t=>{
     const assignees=t.assignees||[];
+    // Creó la tarea
+    if(t.created_by===u.id) return true;
+    // Está asignado
     if(assignees.includes(u.id)) return true;
-    if(directReports.some(rid=>assignees.includes(rid))) return true;
+    // Es tarea de un dependiente directo (creada por o asignada a)
+    if(directReports.length){
+      if(directReports.includes(t.created_by)) return true;
+      if(directReports.some(rid=>assignees.includes(rid))) return true;
+    }
     return false;
   });
 }
@@ -271,7 +276,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.2</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.3</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -396,7 +401,7 @@ function renderList(tasks){
   const el=document.getElementById('tlist');if(!el) return;
   if(!f.length){el.innerHTML=`<div class="empty"><div style="font-size:36px;margin-bottom:12px">📋</div><div>Sin tareas</div></div>`;return;}
   el.innerHTML=f.map(t=>`<div class="task-card" onclick="openTask('${t.id}')">
-    <div class="tc-header"><div class="tc-title">${t.title}</div><span class="pill ${sC(t.status)}">${t.status}</span></div>
+    <div class="tc-header"><div class="tc-title">${t.title}<span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">— ${uName(t.created_by||'')}</span></div><span class="pill ${sC(t.status)}">${t.status}</span></div>
     <div class="tc-desc">${t.description||''}</div>
     <div class="stage-row">${STAGES.map((s,i)=>`<div class="stage-cell ${i<t.stage?'done':i===t.stage?'active':''}">${s.substring(0,4)}</div>`).join('')}</div>
     <div class="tc-footer">
