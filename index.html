@@ -77,7 +77,7 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%
 .pbar-wrap{height:3px;background:var(--surface2);border-radius:3px;flex:1;max-width:70px}
 .pbar{height:3px;border-radius:3px;background:var(--accent)}
 .stage-row{display:flex;margin:8px 0 10px}
-.stage-cell{flex:1;text-align:center;font-size:9px;padding:3px 2px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);border-right:none;font-weight:500}
+.stage-cell{flex:1;text-align:center;font-size:10px;padding:3px 4px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);border-right:none;font-weight:500}
 .stage-cell:first-child{border-radius:4px 0 0 4px}
 .stage-cell:last-child{border-radius:0 4px 4px 0;border-right:1px solid var(--border)}
 .stage-cell.done{background:var(--green-light);color:var(--green-text);border-color:#86efac}
@@ -268,7 +268,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.0</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.1</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -404,7 +404,7 @@ function renderList(tasks){
   el.innerHTML=f.map(t=>`<div class="task-card" onclick="openTask('${t.id}')">
     <div class="tc-header"><div class="tc-title">${t.title}<span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">— ${uName(t.created_by||'')}</span></div><span class="pill ${sC(t.status)}">${t.status}</span></div>
     <div class="tc-desc">${t.description||''}</div>
-    <div class="stage-row">${STAGES.map((s,i)=>`<div class="stage-cell ${i<t.stage?'done':i===t.stage?'active':''}">${s.substring(0,4)}</div>`).join('')}</div>
+    <div class="stage-row">${STAGES.map((s,i)=>`<div class="stage-cell ${i<t.stage?'done':i===t.stage?'active':''}">${s}</div>`).join('')}</div>
     <div class="tc-footer">
       <span class="pill ${pC(t.priority)}">${t.priority}</span>
       <div class="tc-avatars">${(t.assignees||[]).map(id=>{const u=DATA.users.find(x=>x.id===id);return u?`<div class="avatar ${u.color}" style="width:20px;height:20px;font-size:8px;border:1.5px solid var(--surface)" title="${u.name}">${u.initials}</div>`:''}).join('')}</div>
