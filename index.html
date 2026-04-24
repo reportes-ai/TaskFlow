@@ -268,7 +268,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.7</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v1.8</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -376,11 +376,14 @@ function renderView(){
 function renderTasks(tasks){
   const users=DATA.users.filter(u=>u.role==='user');
   document.getElementById('content').innerHTML=`
-    <div class="filters">
-      <span class="filter-label">Estado</span>
-      ${['all',...STAGES].map(s=>`<button class="filter-chip ${S.fStatus===s?'active':''}" onclick="setF('s','${s}')">${s==='all'?'Todos':s}</button>`).join('')}
-      <span class="filter-label" style="margin-left:8px">Persona</span>
-      <button class="filter-chip ${S.fUser==='all'?'active':''}" onclick="setF('u','all')">Todos</button>
+    <div style="margin-bottom:18px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+        <span class="filter-label">Estado</span>
+        ${['all',...STAGES].map(s=>`<button class="filter-chip ${S.fStatus===s?'active':''}" onclick="setF('s','${s}')">${s==='all'?'Todos':s}</button>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="filter-label">Persona</span>
+        <button class="filter-chip ${S.fUser==='all'?'active':''}" onclick="setF('u','all')">Todos</button>
       ${AREAS.filter(a=>users.some(u=>u.area===a)).map(a=>`
         <div style="position:relative;display:inline-block">
           <button class="filter-chip ${users.filter(u=>u.area===a).some(u=>u.id===S.fUser)?'active':''}" onclick="toggleAreaDD('dd-${a.replace(/[^a-z]/gi,'')}')" style="display:flex;align-items:center;gap:4px">${a} <span style="font-size:9px">▾</span></button>
