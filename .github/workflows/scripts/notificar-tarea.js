@@ -38,7 +38,7 @@ async function main() {
       const asignado = usuarios.find(u => u.id === userId);
       if (!asignado || !asignado.email) { console.log(`Usuario ${userId} sin email, omitiendo.`); continue; }
 
-      const asunto = `Nueva tarea asignada: ${tarea.title}`;
+      const asunto = `📆 Nueva Tarea Asignada: ${tarea.title}`;
       const vencimiento = tarea.due_date && tarea.due_date !== '—'
         ? tarea.due_date.split('-').reverse().join('/')
         : 'Sin fecha límite';
