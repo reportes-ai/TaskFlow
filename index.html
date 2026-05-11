@@ -172,7 +172,7 @@ if(SUPABASE_URL==='REEMPLAZA_CON_TU_PROJECT_URL'){
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let S={user:null,view:'tasks',fStatus:'all',fUser:'all'};
+let S={user:null,view:'tasks',fStatus:[],fUser:'all'};
 let DATA={users:[],tasks:[],progress:{},comments:{}};
 let curTaskId=null;
 
@@ -268,7 +268,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.1</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.2</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -379,7 +379,8 @@ function renderTasks(tasks){
     <div style="margin-bottom:18px">
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
         <span class="filter-label">Estado</span>
-        ${['all',...STAGES].map(s=>`<button class="filter-chip ${S.fStatus===s?'active':''}" onclick="setF('s','${s}')">${s==='all'?'Todos':s}</button>`).join('')}
+        <button class="filter-chip ${S.fStatus.length===0?'active':''}" onclick="setF('s','all')">Todos</button>
+        ${STAGES.map(s=>`<button class="filter-chip ${S.fStatus.includes(s)?'active':''}" onclick="setF('s','${s}')">${s}</button>`).join('')}
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <span class="filter-label">Persona</span>
@@ -397,7 +398,7 @@ function renderTasks(tasks){
 
 function renderList(tasks){
   let f=tasks;
-  if(S.fStatus!=='all') f=f.filter(t=>t.status===S.fStatus);
+  if(S.fStatus.length>0) f=f.filter(t=>S.fStatus.includes(t.status));
   if(S.fUser!=='all') f=f.filter(t=>(t.assignees||[]).includes(S.fUser));
   const el=document.getElementById('tlist');if(!el) return;
   if(!f.length){el.innerHTML=`<div class="empty"><div style="font-size:36px;margin-bottom:12px">📋</div><div>Sin tareas</div></div>`;return;}
@@ -416,7 +417,16 @@ function renderList(tasks){
   </div>`).join('');
 }
 
-function setF(type,val){if(type==='s')S.fStatus=val;else S.fUser=val;renderView();}
+function setF(type,val){
+  if(type==='s'){
+    if(val==='all'){S.fStatus=[];}
+    else{
+      if(S.fStatus.includes(val)) S.fStatus=S.fStatus.filter(x=>x!==val);
+      else S.fStatus=[...S.fStatus,val];
+    }
+  } else S.fUser=val;
+  renderView();
+}
 
 function openTask(id){
   curTaskId=id;
