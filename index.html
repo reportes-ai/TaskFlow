@@ -162,6 +162,7 @@ const SUPABASE_KEY = 'sb_publishable_ELtS16GnfSyQXIp6aupMCg_uG-yD5yG';
 <script>
 const STAGES=['Pendiente','En progreso','En revisión','Completada','Bloqueada'];
 const AREAS=['Gerencia','Operaciones','Crédito','Comercial','Finanzas','RRHH','Auditoría'];
+const ORIGINS=['Directorio','Comité Ejecutivo','Auditoría','Reunión Área','Otro'];
 const PRIOS=['Baja','Media','Alta'];
 
 if(SUPABASE_URL==='REEMPLAZA_CON_TU_PROJECT_URL'){
@@ -268,7 +269,7 @@ async function loadAll(){
   (pR.data||[]).forEach(p=>{if(!DATA.progress[p.task_id])DATA.progress[p.task_id]=[];DATA.progress[p.task_id].push(p);});
   DATA.comments={};
   (cR.data||[]).forEach(c=>{if(!DATA.comments[c.task_id])DATA.comments[c.task_id]=[];DATA.comments[c.task_id].push(c);});
-  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.2</span>');
+  setSyncStatus('<span class="realtime-dot"></span>En vivo · <span style="font-family:var(--font-mono,monospace);font-size:10px">v2.3</span>');
   updateBadges();
   if(S.user) renderView();
 }
@@ -471,6 +472,9 @@ function showTab(tab){
       <div class="form-group"><div class="form-label">Descripción</div><div style="font-size:13px;color:var(--text2);line-height:1.6">${t.description||'—'}</div></div>
       <div class="form-row">
         <div class="form-group"><div class="form-label">Prioridad</div><span class="pill ${pC(t.priority)}">${t.priority}</span></div>
+        <div class="form-group"><div class="form-label">Origen</div><div style="font-size:13px">${t.origin?`<span class="pill p-low">📌 ${t.origin}</span>`:'—'}</div></div>
+      </div>
+      <div class="form-row">
         <div class="form-group"><div class="form-label">Fecha límite</div><div style="font-size:13px">📅 ${fmtDue(t.due_date)}</div></div>
       </div>
       <div class="form-group"><div class="form-label">Etapa</div>
@@ -540,6 +544,15 @@ function openNewTask(){
       <div class="form-group"><div class="form-label">Título *</div><input type="text" id="nt-ti" placeholder="Título de la tarea"></div>
       <div class="form-group"><div class="form-label">Descripción</div><textarea id="nt-de" placeholder="Descripción detallada..."></textarea></div>
       <div class="form-row">
+        <div class="form-group"><div class="form-label">Origen de la solicitud *</div>
+          <select id="nt-origin" onchange="toggleOriginOther('nt-origin-other',this.value)">
+            <option value="">— Selecciona origen —</option>
+            ${ORIGINS.map(o=>`<option value="${o}">${o}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><div class="form-label">Especificar (si es Otro)</div><input type="text" id="nt-origin-other" placeholder="Especifica el origen..." style="display:none"></div>
+      </div>
+      <div class="form-row">
         <div class="form-group"><div class="form-label">Prioridad</div><select id="nt-pr">${PRIOS.map(p=>`<option>${p}</option>`).join('')}</select></div>
         <div class="form-group"><div class="form-label">Fecha límite</div><input type="date" id="nt-du"></div>
       </div>
@@ -555,6 +568,10 @@ async function createTask(){
   if(!ti){toast('El título es obligatorio');return;}
   const btn=document.getElementById('btn-create');
   if(btn){btn.disabled=true;btn.textContent='Creando...';}
+  const originVal=document.getElementById('nt-origin').value;
+  if(!originVal){toast('Selecciona el origen de la solicitud');if(btn){btn.disabled=false;btn.textContent='Crear tarea';}return;}
+  const originOther=document.getElementById('nt-origin-other').value.trim();
+  const origin=originVal==='Otro'?(originOther||'Otro'):originVal;
   const {error}=await db.from('tf_tasks').insert({
     id:uid(),title:ti,
     description:document.getElementById('nt-de').value||'',
@@ -562,7 +579,7 @@ async function createTask(){
     assignees:[...document.querySelectorAll('.ac:checked')].map(e=>e.value),
     stage:0,progress:0,
     due_date:document.getElementById('nt-du').value||'—',
-    created_by:S.user.id
+    created_by:S.user.id,origin
   });
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear tarea';}return;}
   closeModal();toast('Tarea creada');await loadAll();
@@ -577,6 +594,15 @@ function openEditTask(id){
     <div class="modal-body">
       <div class="form-group"><div class="form-label">Título</div><input type="text" id="et-ti" value="${t.title}"></div>
       <div class="form-group"><div class="form-label">Descripción</div><textarea id="et-de">${t.description||''}</textarea></div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">Origen de la solicitud</div>
+          <select id="et-origin" onchange="toggleOriginOther('et-origin-other',this.value)">
+            <option value="">— Selecciona origen —</option>
+            ${ORIGINS.map(o=>`<option value="${o==='Otro'?(t.origin&&!ORIGINS.slice(0,-1).includes(t.origin)?'Otro':o):o}" ${(t.origin===o||(o==='Otro'&&t.origin&&!ORIGINS.slice(0,-1).includes(t.origin)))?'selected':''}>${o}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><div class="form-label">Especificar (si es Otro)</div><input type="text" id="et-origin-other" placeholder="Especifica..." value="${t.origin&&!ORIGINS.slice(0,-1).includes(t.origin)?t.origin:''}" style="${t.origin&&!ORIGINS.slice(0,-1).includes(t.origin)?'':'display:none'}"></div>
+      </div>
       <div class="form-row">
         <div class="form-group"><div class="form-label">Prioridad</div><select id="et-pr">${PRIOS.map(p=>`<option ${p===t.priority?'selected':''}>${p}</option>`).join('')}</select></div>
         <div class="form-group"><div class="form-label">Estado</div><select id="et-st">${STAGES.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></div>
@@ -870,6 +896,13 @@ async function deleteUser(id){
   for(const t of affected) await db.from('tf_tasks').update({assignees:t.assignees.filter(a=>a!==id)}).eq('id',t.id);
   await db.from('tf_users').delete().eq('id',id);
   toast('Usuario eliminado');await loadAll();
+}
+
+function toggleOriginOther(fieldId, val){
+  const el=document.getElementById(fieldId);
+  if(!el) return;
+  el.style.display=val==='Otro'?'block':'none';
+  if(val!=='Otro') el.value='';
 }
 
 function toggleAreaDD(id){
