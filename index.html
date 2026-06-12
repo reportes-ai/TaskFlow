@@ -382,7 +382,7 @@ function visibleTasks(){
   return DATA.tasks.filter(t=>t.created_by===u.id||(t.assignees||[]).includes(u.id));
 }
 const userTasks=id=>DATA.tasks.filter(t=>(t.assignees||[]).includes(id));
-const teamMembers=sid=>DATA.users.filter(u=>u.supervisor_id===sid);
+const teamMembers=sid=>DATA.users.filter(u=>u.supervisor_id===sid&&u.role!=='inactive');
 function descendants(sid,seen){seen=seen||new Set();if(seen.has(sid))return[];seen.add(sid);let out=[];teamMembers(sid).forEach(d=>{if(seen.has(d.id))return;out.push(d);out=out.concat(descendants(d.id,seen));});return out;}
 function tasksOf(ids){const set=new Map();ids.forEach(id=>userTasks(id).forEach(t=>set.set(t.id,t)));return[...set.values()];}
 function rollup(tasks){
@@ -488,7 +488,7 @@ function showSwitchUser(){
   openModal(`
     <div class="m-head"><div class="m-title">Selecciona tu perfil</div></div>
     <div class="m-body" style="gap:9px">
-      ${DATA.users.filter(u=>u.role!=='vacant').map(u=>`
+      ${DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive').map(u=>`
         <div onclick="askPin('${u.id}')" style="display:flex;align-items:center;gap:13px;padding:13px 15px;border:1.5px solid var(--border);border-radius:var(--r-lg);cursor:pointer;transition:.15s" onmouseenter="this.style.borderColor='var(--cyan)';this.style.background='var(--cyan-soft)'" onmouseleave="this.style.borderColor='var(--border)';this.style.background=''">
           ${avatar(u,42)}
           <div style="flex:1"><div style="font-weight:700;font-size:14px">${esc(u.name)}</div><div style="font-size:11px;color:var(--text3);font-weight:600;margin-top:2px">${esc(u.area||'')} · PIN requerido</div></div>
@@ -565,10 +565,10 @@ function renderView(){
 /* ---------- HOME ---------- */
 function areaSeries(){
   const groups=AREAS.map(a=>({name:a,abbr:areaAbbr(a),col:AREA_COLOR[a],legacy:false}));
-  const legacyPpl=DATA.users.filter(u=>u.role!=='vacant'&&!AREAS.includes(u.area));
+  const legacyPpl=DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&!AREAS.includes(u.area));
   groups.push({name:'Otras / antiguas',abbr:'Otr',col:'var(--slate)',legacy:true});
   groups.forEach(g=>{
-    const ppl=g.legacy?legacyPpl:DATA.users.filter(u=>u.role!=='vacant'&&u.area===g.name);
+    const ppl=g.legacy?legacyPpl:DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&u.area===g.name);
     const tasks=tasksOf(ppl.map(p=>p.id));
     g.tasks=tasks;g.total=tasks.length;g.people=ppl.length;
     g.counts={};STAGES.forEach(s=>g.counts[s]=tasks.filter(t=>t.status===s).length);
@@ -780,8 +780,8 @@ async function kDrop(e,stageIdx){
 
 /* ---------- TEAMS ---------- */
 function renderTeams(){
-  const roots=DATA.users.filter(u=>!u.supervisor_id);
-  const people=DATA.users.length;
+  const roots=DATA.users.filter(u=>!u.supervisor_id&&u.role!=='inactive');
+  const people=DATA.users.filter(u=>u.role!=='inactive'&&u.role!=='vacant').length;
   const supervisors=DATA.users.filter(u=>teamMembers(u.id).length>0);
   const allVis=visibleTasks();const ro=rollup(allVis);
   const c=document.getElementById('content');
@@ -818,17 +818,17 @@ function orgNode(u,seen){
   const col=u.role==='admin'?'var(--cyan)':(AREA_COLOR[u.area]||'var(--slate)');
   return `<li>
     <div class="node ${u.role==='admin'?'is-admin':(vac?'is-vacant':'')}" style="${u.role==='admin'?'':'border-top:3px solid '+col}" onclick="openPerson('${u.id}')">
-      ${n&&!vac?`<span class="node-count" style="background:${col}">${n}</span>`:''}
-      ${avatar(u,40)}
+      ${vac?`<span class="node-count" style="background:var(--amber);min-width:auto;width:auto;height:auto;font-size:8px;font-weight:800;padding:2px 7px;letter-spacing:.5px">VACANTE</span>`:(n?`<span class="node-count" style="background:${col}">${n}</span>`:'')}
+      ${vac?`<div class="avatar" style="width:40px;height:40px;font-size:22px;background:var(--surface2);color:var(--text3);border:1.5px dashed var(--text3);font-weight:400">＋</div>`:avatar(u,40)}
       <div class="node-name">${esc(u.name)}</div>
-      <div class="node-area">${vac?'○ Cargo vacante':esc(cargoOf(u)||u.area||(u.role==='admin'?'Gerencia General':''))}</div>
+      <div class="node-area">${vac?(esc(u.area||'')||'Posición abierta'):esc(cargoOf(u)||u.area||(u.role==='admin'?'Gerencia General':''))}</div>
     </div>
     ${kids.length?`<ul>${kids.map(k=>orgNode(k,seen)).join('')}</ul>`:''}
   </li>`;
 }
 function areaAbbr(area){return (area.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('')||area[0]).slice(0,2).toUpperCase();}
 function areaCard(area){
-  const ppl=DATA.users.filter(u=>u.role!=='vacant'&&u.area===area);
+  const ppl=DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&u.area===area);
   const ro=rollup(tasksOf(ppl.map(p=>p.id)));
   const col=AREA_COLOR[area]||'var(--slate)';
   return `<div class="team-card">
@@ -1047,7 +1047,7 @@ async function createTask(){
 }
 function areaManager(area){
   if(!area)return null;
-  const inArea=DATA.users.filter(u=>u.role!=='vacant'&&u.area===area);
+  const inArea=DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&u.area===area);
   if(!inArea.length)return null;
   let m=inArea.find(u=>{const s=getU(u.supervisor_id);return s&&s.role==='admin';});
   if(m)return m;
@@ -1059,7 +1059,7 @@ function openReassign(taskId){
   if(t.status==='Completada'){toast('No se puede reasignar una tarea completada');return;}
   const cur=getU((t.assignees||[])[0]);
   const curGer=cur?areaManager(cur.area):null;
-  const users=DATA.users.filter(u=>u.role!=='vacant');
+  const users=DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive');
   const optsByArea=AREAS.map(a=>{const us=users.filter(u=>u.area===a);return us.length?`<optgroup label="${a}">${us.map(u=>`<option value="${u.id}" ${cur&&cur.id===u.id?'selected':''}>${esc(u.name)}${cargoOf(u)?' — '+esc(cargoOf(u)):''}</option>`).join('')}</optgroup>`:'';}).join('');
   const others=users.filter(u=>!AREAS.includes(u.area));
   const optsOther=others.length?`<optgroup label="Otras / antiguas">${others.map(u=>`<option value="${u.id}" ${cur&&cur.id===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</optgroup>`:'';
@@ -1205,8 +1205,8 @@ function showRT(tab){
       </tr>`;}).join('')}
     </tbody></table></div>`;
   }else if(tab==='byarea'){
-    const groups=AREAS.map(a=>({a,ppl:DATA.users.filter(u=>u.role!=='vacant'&&u.area===a)}));
-    const legacyPpl=DATA.users.filter(u=>u.role!=='vacant'&&!AREAS.includes(u.area));
+    const groups=AREAS.map(a=>({a,ppl:DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&u.area===a)}));
+    const legacyPpl=DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&!AREAS.includes(u.area));
     if(legacyPpl.length)groups.push({a:'Otras / antiguas',ppl:legacyPpl});
     c.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Área</th><th>Personas</th><th>Tareas</th><th>Avance</th><th>Completadas</th><th>Bloqueadas</th></tr></thead><tbody>
       ${groups.map(g=>{const ro=rollup(tasksOf(g.ppl.map(p=>p.id)));const col=AREA_COLOR[g.a]||'var(--slate)';return `<tr>
@@ -1228,21 +1228,27 @@ function showRT(tab){
 
 /* ---------- USERS ---------- */
 function renderUsers(){
-  const users=DATA.users;
+  const all=DATA.users;
+  const actives=all.filter(u=>u.role==='user'||u.role==='admin');
+  const vacants=all.filter(u=>u.role==='vacant');
+  const inactives=all.filter(u=>u.role==='inactive');
+  const rank=x=>x.role==='inactive'?2:(x.role==='vacant'?1:0);
+  const ordered=[...all].sort((a,b)=>rank(a)-rank(b));
   document.getElementById('content').innerHTML=`
-    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));max-width:520px;margin-bottom:20px">
-      ${statCard(users.length,'Usuarios','var(--navy)','var(--cyan-soft)',icSm('play'))}
-      ${statCard(DATA.tasks.length,'Tareas','var(--cyan)','var(--cyan-soft)',icSm('clock'))}
-      ${statCard(DATA.users.filter(u=>teamMembers(u.id).length>0).length,'Equipos','var(--blue)','var(--blue-l)',icSm('check'))}
+    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));max-width:620px;margin-bottom:20px">
+      ${statCard(actives.length,'Activos','var(--green)','var(--green-l)',icSm('check'))}
+      ${statCard(vacants.length,'Vacantes','var(--amber)','var(--amber-l)',icSm('clock'))}
+      ${statCard(inactives.length,'Desactivados','var(--slate)','var(--slate-l)',icSm('alert'))}
     </div>
-    <div class="table-wrap"><table><thead><tr><th>Usuario</th><th>Área</th><th>Supervisor</th><th>PIN</th><th>Tareas</th><th></th></tr></thead><tbody>
-    ${users.map(u=>{const n=userTasks(u.id).length;const sup=u.supervisor_id?getU(u.supervisor_id):null;const deps=teamMembers(u.id);return `<tr>
-      <td><div style="display:flex;align-items:center;gap:10px">${avatar(u,32)}<div><div style="font-weight:700">${esc(u.name)}${u.role==='admin'?' <span class="pill s-EnProgreso" style="font-size:9px;padding:1px 7px">Admin</span>':''}${u.role==='vacant'?' <span class="pill pr-Media" style="font-size:9px;padding:1px 7px">Vacante</span>':''}</div>${cargoOf(u)?`<div style="font-size:10.5px;color:var(--cyan);font-weight:600">${esc(cargoOf(u))}</div>`:''}${deps.length?`<div style="font-size:10px;color:var(--text3);font-weight:600">Supervisa: ${deps.map(d=>esc(d.name.split(' ')[0])).join(', ')}</div>`:''}</div></div></td>
+    <div class="table-wrap"><table><thead><tr><th>Usuario</th><th>Estado</th><th>Área</th><th>Supervisor</th><th>PIN</th><th>Tareas</th><th></th></tr></thead><tbody>
+    ${ordered.map(u=>{const n=userTasks(u.id).length;const sup=u.supervisor_id?getU(u.supervisor_id):null;const deps=teamMembers(u.id);const inactive=u.role==='inactive';return `<tr style="${inactive?'opacity:.62':''}">
+      <td><div style="display:flex;align-items:center;gap:10px">${avatar(u,32)}<div><div style="font-weight:700">${esc(u.name)}</div>${cargoOf(u)?`<div style="font-size:10.5px;color:var(--cyan);font-weight:600">${esc(cargoOf(u))}</div>`:''}${deps.length?`<div style="font-size:10px;color:var(--text3);font-weight:600">Supervisa: ${deps.map(d=>esc(d.name.split(' ')[0])).join(', ')}</div>`:''}</div></div></td>
+      <td>${u.role==='admin'?'<span class="pill" style="font-size:10px;background:var(--cyan-soft);color:var(--navy)">Admin</span>':u.role==='vacant'?'<span class="pill" style="font-size:10px;background:var(--amber-l);color:var(--amber-t)">Vacante</span>':inactive?'<span class="pill" style="font-size:10px;background:var(--slate-l);color:var(--slate-t)">Desactivado</span>':'<span class="pill" style="font-size:10px;background:var(--green-l);color:var(--green-t)">Activo</span>'}</td>
       <td><span class="tag">${esc(u.area||'—')}</span></td>
       <td>${sup?`<div style="display:flex;align-items:center;gap:6px">${avatar(sup,22)}<span style="font-size:12px">${esc(sup.name)}</span></div>`:'<span style="color:var(--text3)">—</span>'}</td>
-      <td>${u.role==='vacant'?'<span style="color:var(--text3)">—</span>':`<span style="font-family:var(--fm)">${esc(u.pin||'1234')}</span><button class="btn btn-xs" style="margin-left:7px" onclick="editPin('${u.id}',true)">cambiar</button>`}</td>
+      <td>${u.role==='vacant'||inactive?'<span style="color:var(--text3)">—</span>':`<span style="font-family:var(--fm)">${esc(u.pin||'1234')}</span><button class="btn btn-xs" style="margin-left:7px" onclick="editPin('${u.id}',true)">cambiar</button>`}</td>
       <td>${n}</td>
-      <td><div style="display:flex;gap:6px;justify-content:flex-end">${u.role!=='admin'?`<button class="btn btn-xs" onclick="openEditUser('${u.id}')">Editar</button><button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')">Eliminar</button>`:'<span style="font-size:11px;color:var(--text3)">—</span>'}</div></td>
+      <td><div style="display:flex;gap:6px;justify-content:flex-end">${u.role==='admin'?'<span style="font-size:11px;color:var(--text3)">—</span>':inactive?`<button class="btn btn-xs" onclick="reactivateUser('${u.id}')">Reactivar</button>`:`<button class="btn btn-xs" onclick="openEditUser('${u.id}')">Editar</button><button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')">Eliminar</button>`}</div></td>
     </tr>`;}).join('')}
     </tbody></table></div>`;
 }
@@ -1294,7 +1300,7 @@ async function saveEditUser(userId){
   const btn=document.getElementById('btn-eu');if(btn){btn.disabled=true;btn.textContent='Guardando…';}
   const parts=name.split(' ');const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
   const updates={name,initials,supervisor_id:supId,area,color:cargo||'av-user',role:vac?'vacant':'user'};
-  if(vac){updates.email='';updates.pin='0000';}
+  if(vac){updates.email='vacante-'+userId+'@taskflow.local';updates.pin='0000';}
   else{updates.email=email||'';if(pin)updates.pin=pin;else if(wasVacant)updates.pin='1234';}
   const{error}=await db.from('tf_users').update(updates).eq('id',userId);
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Guardar';}return;}
@@ -1318,6 +1324,7 @@ function openNewUser(){
     </div>
     <div class="m-foot"><button class="btn btn-sm" onclick="closeModal()">Cancelar</button><button class="btn btn-primary btn-sm" id="btn-nu" onclick="createUser()">Crear</button></div>`);
 }
+let pendingNewUser=null;
 async function createUser(){
   const vac=document.getElementById('nu-vac').checked;
   const cargo=document.getElementById('nu-cargo').value.trim();
@@ -1329,19 +1336,87 @@ async function createUser(){
   if(!vac&&!email){toast('Completa el email');return;}
   if(!vac&&!/^\d{4}$/.test(pin)){toast('El PIN debe ser 4 dígitos');return;}
   const name=vac?cargo:na;
-  const btn=document.getElementById('btn-nu');if(btn){btn.disabled=true;btn.textContent='Creando…';}
   const parts=name.split(' ');const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
   const supId=document.getElementById('nu-sup').value||null;
-  const{error}=await db.from('tf_users').insert({id:uid(),name,email:vac?'':email,role:vac?'vacant':'user',initials,color:cargo||'av-user',pin:vac?'0000':pin,supervisor_id:supId,area});
+  if(!vac&&cargo){
+    const matches=DATA.users.filter(x=>x.role==='vacant'&&cargoOf(x)===cargo&&x.area===area);
+    if(matches.length){pendingNewUser={na,email,pin,area,supId,cargo,initials};openVacancyChooser(matches);return;}
+  }
+  const btn=document.getElementById('btn-nu');if(btn){btn.disabled=true;btn.textContent='Creando…';}
+  const newId=uid();
+  const{error}=await db.from('tf_users').insert({id:newId,name,email:vac?('vacante-'+newId+'@taskflow.local'):email,role:vac?'vacant':'user',initials,color:cargo||'av-user',pin:vac?'0000':pin,supervisor_id:supId,area});
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Crear';}return;}
   closeModal();toast(vac?'Cargo vacante creado ✓':'Usuario creado ✓');await loadAll();
 }
+function openVacancyChooser(matches){
+  const d=pendingNewUser;if(!d)return;
+  openModal(`
+    <div class="m-head"><div class="m-title">Vacantes de «${esc(d.cargo)}»</div><button class="xbtn" onclick="cancelChooser()">×</button></div>
+    <div class="m-body" style="gap:11px">
+      <div style="font-size:13px;color:var(--text2);line-height:1.5">Hay <b>${matches.length}</b> posición(es) vacante(s) con este cargo en <b>${esc(d.area)}</b>. Puedes asignar a <b>${esc(d.na)}</b> a una existente o crear una posición nueva (headcount adicional).</div>
+      ${matches.map(m=>{const sup=m.supervisor_id?getU(m.supervisor_id):null;return `<button class="btn" style="justify-content:flex-start;text-align:left;height:auto;padding:12px 14px" onclick="fillVacancyWith('${m.id}')">
+        <div><div style="font-weight:700">🪑 Ocupar esta vacante</div><div style="font-size:11.5px;color:var(--text2);font-weight:500;margin-top:2px">${esc(m.area||'')}${sup?` · reporta a ${esc(sup.name)}`:' · sin supervisor'}</div></div>
+      </button>`;}).join('')}
+      <button class="btn btn-primary" style="justify-content:flex-start;text-align:left;height:auto;padding:12px 14px" onclick="createUserConfirmNew()">
+        <div><div style="font-weight:700">＋ Crear posición nueva</div><div style="font-size:11.5px;color:rgba(255,255,255,.85);font-weight:500;margin-top:2px">Agrega otro «${esc(d.cargo)}» como cupo adicional</div></div>
+      </button>
+    </div>
+    <div class="m-foot"><button class="btn btn-sm" onclick="cancelChooser()">Cancelar</button></div>`);
+}
+function cancelChooser(){pendingNewUser=null;closeModal();}
+async function fillVacancyWith(vacId){
+  const d=pendingNewUser;if(!d)return;const vac=getU(vacId);if(!vac)return;
+  const{error}=await db.from('tf_users').update({name:d.na,email:d.email,role:'user',initials:d.initials,color:d.cargo,pin:d.pin,supervisor_id:d.supId||vac.supervisor_id,area:d.area}).eq('id',vacId);
+  if(error){toast('Error: '+error.message);return;}
+  pendingNewUser=null;closeModal();toast('Posición vacante ocupada ✓');await loadAll();
+}
+async function createUserConfirmNew(){
+  const d=pendingNewUser;if(!d)return;
+  const{error}=await db.from('tf_users').insert({id:uid(),name:d.na,email:d.email,role:'user',initials:d.initials,color:d.cargo||'av-user',pin:d.pin,supervisor_id:d.supId,area:d.area});
+  if(error){toast('Error: '+error.message);return;}
+  pendingNewUser=null;closeModal();toast('Usuario creado ✓');await loadAll();
+}
 async function deleteUser(id){
-  const u=getU(id);if(!u||!confirm(`¿Eliminar a ${u.name}?`))return;
-  const affected=DATA.tasks.filter(t=>(t.assignees||[]).includes(id));
-  for(const t of affected)await db.from('tf_tasks').update({assignees:t.assignees.filter(a=>a!==id)}).eq('id',t.id);
-  await db.from('tf_users').delete().eq('id',id);
-  toast('Usuario eliminado');await loadAll();
+  const u=getU(id);if(!u)return;
+  if(u.role==='vacant'){
+    if(!confirm(`¿Eliminar la posición vacante "${u.name}"? (esto sí elimina la posición del organigrama)`))return;
+    const reps=DATA.users.filter(x=>x.supervisor_id===id);
+    for(const r of reps)await db.from('tf_users').update({supervisor_id:u.supervisor_id||null}).eq('id',r.id);
+    await db.from('tf_users').delete().eq('id',id);
+    toast('Posición eliminada');await loadAll();return;
+  }
+  const deps=DATA.users.filter(x=>x.supervisor_id===id&&x.role!=='inactive');
+  openModal(`
+    <div class="m-head"><div class="m-title">Dar de baja — ${esc(u.name)}</div><button class="xbtn" onclick="closeModal()">×</button></div>
+    <div class="m-body" style="gap:13px">
+      <div style="font-size:13.5px;color:var(--text2);line-height:1.55">En ambos casos <b>se conserva su nombre y su historial</b> (avances, comentarios y tareas pasadas) en el registro como <b>Desactivado</b>. Elige qué pasa con su posición${cargoOf(u)?` («${esc(cargoOf(u))}»)`:''}${deps.length?` · tiene <b>${deps.length}</b> persona(s) a cargo`:''}:</div>
+      <button class="btn" style="justify-content:flex-start;text-align:left;height:auto;padding:13px 15px" onclick="deactivateUser('${id}','vacant')">
+        <div><div style="font-weight:700">🪑 Dejar vacante</div><div style="font-size:11.5px;color:var(--text2);font-weight:500;margin-top:2px">La posición queda abierta como VACANTE en el organigrama${deps.length?' y su equipo pasa a depender de la vacante':''}. Para cuando buscarás un reemplazo.</div></div>
+      </button>
+      <button class="btn" style="justify-content:flex-start;text-align:left;height:auto;padding:13px 15px" onclick="deactivateUser('${id}','remove')">
+        <div><div style="font-weight:700">🗑️ Eliminar la posición</div><div style="font-size:11.5px;color:var(--text2);font-weight:500;margin-top:2px">La posición desaparece del organigrama${deps.length?' y su equipo pasa a depender de su supervisor':''}. Para cuando el cargo ya no existirá.</div></div>
+      </button>
+    </div>
+    <div class="m-foot"><button class="btn btn-sm" onclick="closeModal()">Cancelar</button></div>`);
+}
+async function deactivateUser(id,mode){
+  const u=getU(id);if(!u)return;
+  const deps=DATA.users.filter(x=>x.supervisor_id===id&&x.role!=='inactive');
+  if(mode==='vacant'){
+    const vacId=uid();const title=cargoOf(u)||u.name;const parts=title.split(' ');
+    const initials=(parts[0][0]+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase();
+    await db.from('tf_users').insert({id:vacId,name:title,email:'vacante-'+vacId+'@taskflow.local',role:'vacant',initials,color:cargoOf(u)||'av-user',pin:'0000',supervisor_id:u.supervisor_id,area:u.area});
+    for(const r of deps)await db.from('tf_users').update({supervisor_id:vacId}).eq('id',r.id);
+  }else{
+    for(const r of deps)await db.from('tf_users').update({supervisor_id:u.supervisor_id||null}).eq('id',r.id);
+  }
+  await db.from('tf_users').update({role:'inactive'}).eq('id',id);
+  closeModal();toast(mode==='vacant'?'Desactivado · posición vacante ✓':'Desactivado · posición eliminada ✓');await loadAll();
+}
+async function reactivateUser(id){
+  const u=getU(id);if(!u||!confirm(`¿Reactivar a ${u.name}? Volverá a aparecer como usuario activo.`))return;
+  await db.from('tf_users').update({role:'user'}).eq('id',id);
+  toast('Usuario reactivado ✓');await loadAll();
 }
 
 /* ---------- PIN change ---------- */
