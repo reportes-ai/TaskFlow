@@ -217,6 +217,10 @@ button{font-family:inherit}
 .chip{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--border2)}
 .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.filters-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.fsel{display:flex;flex-direction:column;gap:4px}
+.fsel label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fsel select{min-width:150px;padding:8px 32px 8px 12px;font-size:13px;font-weight:600}
 .dd{position:relative;display:inline-block}
 .dd-menu{display:none;position:absolute;top:115%;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-lg);z-index:30;min-width:170px;padding:5px;max-height:280px;overflow-y:auto}
 .dd-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 10px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;border-radius:8px;color:var(--text)}
@@ -339,7 +343,7 @@ const AV_PALETTE=[['#dbeafe','#1e40af'],['#dcfce7','#166534'],['#fef3c7','#92600
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let S={user:null,view:'home',fStatus:[],fOrigin:[],fArea:'all',fTeam:'all',teamMode:'org'};
+let S={user:null,view:'home',fStatus:'all',fOrigin:'all',fArea:'all',fTeam:'all',teamMode:'org'};
 let DATA={users:[],tasks:[],progress:{},comments:{}};
 let curTaskId=null;
 
@@ -351,16 +355,17 @@ const prCls=p=>'pr-'+(p||'Baja');
 const getU=id=>DATA.users.find(x=>x.id===id);
 const uName=id=>{const u=getU(id);return u?u.name:'—';};
 
+const isAdminUser=u=>!!u&&(u.role==='admin'||u.area==='Gerencia General');
 function avColors(u){
   if(!u) return ['#e3e8f1','#5a6a86'];
-  if(u.role==='admin') return ['#002060','#ffffff'];
+  if(isAdminUser(u)) return ['#002060','#ffffff'];
   if(u.role==='vacant') return ['#eef1f6','#9aa3b8'];
   let h=0;const s=u.id||u.name||'';for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
   return AV_PALETTE[h%AV_PALETTE.length];
 }
 function avatar(u,size){
   size=size||34;const[bg,fg]=avColors(u||null);const init=u?u.initials:'?';
-  const ring=u&&u.role==='admin'?`box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--cyan2);`:(u&&u.role==='vacant'?`border:1.5px dashed var(--text3);`:'');
+  const ring=u&&isAdminUser(u)?`box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--cyan2);`:(u&&u.role==='vacant'?`border:1.5px dashed var(--text3);`:'');
   return `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.38)}px;background:${bg};color:${fg};${ring}">${esc(init)}</div>`;
 }
 const avById=(id,size)=>avatar(getU(id),size);
@@ -378,7 +383,7 @@ function dueInfo(s){
 
 function visibleTasks(){
   const u=S.user;if(!u)return[];
-  if(u.role==='admin')return DATA.tasks;
+  if(isAdminUser(u))return DATA.tasks;
   return DATA.tasks.filter(t=>t.created_by===u.id||(t.assignees||[]).includes(u.id));
 }
 const userTasks=id=>DATA.tasks.filter(t=>(t.assignees||[]).includes(id));
@@ -470,7 +475,7 @@ async function loadAll(){
   DATA.users=uR.data||[];DATA.tasks=tR.data||[];
   DATA.progress={};(pR.data||[]).forEach(p=>{(DATA.progress[p.task_id]=DATA.progress[p.task_id]||[]).push(p);});
   DATA.comments={};(cR.data||[]).forEach(c=>{(DATA.comments[c.task_id]=DATA.comments[c.task_id]||[]).push(c);});
-  setSync('En vivo · v3.0',true);
+  setSync('En vivo · v3.1',true);
   updateBadges();
   if(S.user)renderView();
 }
@@ -532,7 +537,7 @@ function updateMe(){
   document.getElementById('me-av').innerHTML=avatar(u,36);
   document.getElementById('me-name').textContent=u.name;
   document.getElementById('me-role').textContent=u.role==='admin'?'Administrador':(u.area||'Usuario');
-  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=u.role==='admin'?'':'none');
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdminUser(u)?'':'none');
   updateBadges();
 }
 function updateBadges(){
@@ -540,7 +545,14 @@ function updateBadges(){
   if(a)a.textContent=S.user?visibleTasks().length:DATA.tasks.length;
   if(m&&S.user)m.textContent=userTasks(S.user.id).length;
   const tm=document.getElementById('bdg-team');
-  if(tm&&S.user){const ids=new Set(descendants(S.user.id).map(x=>x.id));tm.textContent=DATA.tasks.filter(t=>(t.assignees||[]).some(id=>ids.has(id))).length;}
+  const teamBtn=document.querySelector('.nav-btn[data-view="team"]');
+  if(S.user){
+    const admin=isAdminUser(S.user);
+    const teamPeople=admin?DATA.users.filter(x=>x.role!=='vacant'&&x.role!=='inactive'&&x.id!==S.user.id):descendants(S.user.id).filter(x=>x.role!=='vacant');
+    const show=admin||teamPeople.length>0;
+    if(teamBtn)teamBtn.style.display=show?'':'none';
+    if(tm){const ids=new Set(teamPeople.map(x=>x.id));tm.textContent=DATA.tasks.filter(t=>(t.assignees||[]).some(id=>ids.has(id))).length;}
+  }
 }
 
 /* ---------- nav ---------- */
@@ -667,8 +679,8 @@ function statCard(n,label,color,bg,ic,dbl){
     <div class="stat-lbl">${label}</div>
   </div>`;
 }
-function goAreaFilter(area){S.fStatus=[];S.fOrigin=[];S.fArea=area;nav('tasks');}
-function goStatusFilter(st){S.fArea='all';S.fOrigin=[];S.fStatus=st==='all'?[]:[st];nav('tasks');}
+function goAreaFilter(area){S.fStatus='all';S.fOrigin='all';S.fArea=area;S.fTeam='all';nav('tasks');}
+function goStatusFilter(st){S.fArea='all';S.fOrigin='all';S.fStatus=st;S.fTeam='all';nav('tasks');}
 function icSm(t){
   const m={clock:'<circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M9 5.5V9l2.4 1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
   play:'<circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M7.5 6.5l4 2.5-4 2.5z" fill="currentColor"/>',
@@ -686,28 +698,28 @@ function renderTasksView(tasks,isMy){
       <div style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--navy)"><span style="display:inline-flex;width:26px;height:26px;border-radius:8px;background:var(--cyan-soft);align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 15 15" fill="none"><rect x="2" y="2.5" width="3.6" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9.4" y="2.5" width="3.6" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/></svg></span>Tablero</div>
       <div style="font-size:12.5px;color:var(--text3);font-weight:600">${tasks.length} tarea${tasks.length===1?'':'s'}</div>
     </div>
-    <div class="filterbar">
-      <div class="frow"><span class="flabel">Estado</span>
-        <button class="chip ${S.fStatus.length===0?'active':''}" onclick="setF('s','all')">Todos</button>
-        ${STAGES.map(s=>`<button class="chip ${S.fStatus.includes(s)?'active':''}" onclick="setF('s','${s}')">${s}</button>`).join('')}
-      </div>
-      <div class="frow"><span class="flabel">Origen</span>
-        <button class="chip ${S.fOrigin.length===0?'active':''}" onclick="setF('o','all')">Todos</button>
-        ${ORIGINS.map(o=>`<button class="chip ${S.fOrigin.includes(o)?'active':''}" onclick="setF('o','${o}')">${o}</button>`).join('')}
-      </div>
-      <div class="frow"><span class="flabel">Área</span>
-        <button class="chip ${S.fArea==='all'?'active':''}" onclick="setF('a','all')">Todas</button>
-        ${AREAS.map(a=>`<button class="chip ${S.fArea===a?'active':''}" onclick="setF('a','${a}')">${a}</button>`).join('')}
-      </div>
-    </div>
+    <div class="filterbar"><div class="filters-row">
+      <div class="fsel"><label>Estado</label><select onchange="setSel('s',this.value)">
+        <option value="all" ${S.fStatus==='all'?'selected':''}>Todos</option>
+        ${STAGES.map(s=>`<option value="${s}" ${S.fStatus===s?'selected':''}>${s}</option>`).join('')}
+      </select></div>
+      <div class="fsel"><label>Origen</label><select onchange="setSel('o',this.value)">
+        <option value="all" ${S.fOrigin==='all'?'selected':''}>Todos</option>
+        ${ORIGINS.map(o=>`<option value="${o}" ${S.fOrigin===o?'selected':''}>${o}</option>`).join('')}
+      </select></div>
+      <div class="fsel"><label>Área</label><select onchange="setSel('a',this.value)">
+        <option value="all" ${S.fArea==='all'?'selected':''}>Todas</option>
+        ${AREAS.map(a=>`<option value="${esc(a)}" ${S.fArea===a?'selected':''}>${esc(a)}</option>`).join('')}
+      </select></div>
+    </div></div>
     <div id="task-area"></div>`;
   renderTaskArea(tasks);
 }
 
 function applyFilters(tasks){
   let f=tasks;
-  if(S.fStatus.length)f=f.filter(t=>S.fStatus.includes(t.status));
-  if(S.fOrigin.length)f=f.filter(t=>{const std=ORIGINS.slice(0,-1).includes(t.origin);if(S.fOrigin.includes(t.origin))return true;if(!std&&S.fOrigin.includes('Otro'))return true;if(!t.origin&&S.fOrigin.includes('Otro'))return true;return false;});
+  if(S.fStatus!=='all')f=f.filter(t=>t.status===S.fStatus);
+  if(S.fOrigin!=='all')f=f.filter(t=>S.fOrigin==='Otro'?!ORIGINS.slice(0,-1).includes(t.origin):t.origin===S.fOrigin);
   if(S.fArea!=='all')f=f.filter(t=>(t.assignees||[]).some(id=>{const u=getU(id);return u&&u.area===S.fArea;}));
   return f;
 }
@@ -717,44 +729,53 @@ function renderTaskArea(tasks){
   el.innerHTML=renderKanban(f);
 }
 function renderTeamTasks(){
-  const team=descendants(S.user.id).filter(m=>m.role!=='vacant');
+  const admin=isAdminUser(S.user);
+  const team=admin?DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&u.id!==S.user.id)
+                  :descendants(S.user.id).filter(m=>m.role!=='vacant');
   const c=document.getElementById('content');
   if(!team.length){c.innerHTML=emptyBox('👥','Nadie te reporta todavía. Cuando tengas personas a cargo, aquí verás todas sus tareas.');return;}
   const teamIds=new Set(team.map(m=>m.id));
   const teamTasks=DATA.tasks.filter(t=>(t.assignees||[]).some(id=>teamIds.has(id)));
   const ro=rollup(teamTasks);
   let shown=teamTasks;
+  if(admin&&S.fArea!=='all')shown=shown.filter(t=>(t.assignees||[]).some(id=>{const u=getU(id);return u&&u.area===S.fArea;}));
   if(S.fTeam!=='all')shown=shown.filter(t=>(t.assignees||[]).includes(S.fTeam));
-  if(S.fStatus.length)shown=shown.filter(t=>S.fStatus.includes(t.status));
-  const members=[...team].sort((a,b)=>a.name.localeCompare(b.name));
+  if(S.fStatus!=='all')shown=shown.filter(t=>t.status===S.fStatus);
+  let pool=team;
+  if(admin&&S.fArea!=='all')pool=team.filter(m=>m.area===S.fArea);
+  pool=[...pool].sort((a,b)=>a.name.localeCompare(b.name));
   c.innerHTML=`
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-      <div style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--navy)"><span style="display:inline-flex;width:26px;height:26px;border-radius:8px;background:var(--cyan-soft);align-items:center;justify-content:center;font-size:14px">👥</span>Tareas de mi equipo</div>
-      <div style="font-size:12.5px;color:var(--text3);font-weight:600">${members.length} persona(s) a cargo · ${teamTasks.length} tarea(s)</div>
+      <div style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--navy)"><span style="display:inline-flex;width:26px;height:26px;border-radius:8px;background:var(--cyan-soft);align-items:center;justify-content:center;font-size:14px">👥</span>${admin?'Tareas de la organización':'Tareas de mi equipo'}</div>
+      <div style="font-size:12.5px;color:var(--text3);font-weight:600">${team.length} persona(s)${admin?'':' a cargo'} · ${teamTasks.length} tarea(s)</div>
     </div>
     <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:18px">
-      ${statCard(teamTasks.length,'Tareas del equipo','var(--navy)','var(--cyan-soft)',icSm('clock'))}
+      ${statCard(teamTasks.length,admin?'Tareas totales':'Tareas del equipo','var(--navy)','var(--cyan-soft)',icSm('clock'))}
       ${statCard(ro.prog,'En progreso','var(--blue)','var(--blue-l)',icSm('play'))}
       ${statCard(teamTasks.filter(t=>t.status==='Pendiente').length,'Pendientes','var(--amber)','var(--amber-l)',icSm('clock'))}
       ${statCard(ro.blocked,'Bloqueadas','var(--red)','var(--red-l)',icSm('alert'))}
     </div>
-    <div class="filterbar">
-      <div class="frow"><span class="flabel">Persona</span>
-        <button class="chip ${S.fTeam==='all'?'active':''}" onclick="setF('tm','all')">Todos</button>
-        ${members.map(m=>`<button class="chip ${S.fTeam===m.id?'active':''}" onclick="setF('tm','${m.id}')" title="${esc(m.name)}${cargoOf(m)?' · '+esc(cargoOf(m)):''}">${esc(m.name.split(' ')[0])}</button>`).join('')}
-      </div>
-      <div class="frow"><span class="flabel">Estado</span>
-        <button class="chip ${S.fStatus.length===0?'active':''}" onclick="setF('s','all')">Todos</button>
-        ${STAGES.map(s=>`<button class="chip ${S.fStatus.includes(s)?'active':''}" onclick="setF('s','${s}')">${s}</button>`).join('')}
-      </div>
-    </div>
+    <div class="filterbar"><div class="filters-row">
+      ${admin?`<div class="fsel"><label>Área</label><select onchange="setSel('a',this.value)">
+        <option value="all" ${S.fArea==='all'?'selected':''}>Todas las áreas</option>
+        ${AREAS.map(a=>`<option value="${esc(a)}" ${S.fArea===a?'selected':''}>${esc(a)}</option>`).join('')}
+      </select></div>`:''}
+      <div class="fsel"><label>Persona</label><select onchange="setSel('tm',this.value)">
+        <option value="all" ${S.fTeam==='all'?'selected':''}>Todas las personas</option>
+        ${pool.map(m=>`<option value="${m.id}" ${S.fTeam===m.id?'selected':''}>${esc(m.name)}${cargoOf(m)?' — '+esc(cargoOf(m)):''}</option>`).join('')}
+      </select></div>
+      <div class="fsel"><label>Estado</label><select onchange="setSel('s',this.value)">
+        <option value="all" ${S.fStatus==='all'?'selected':''}>Todos</option>
+        ${STAGES.map(s=>`<option value="${s}" ${S.fStatus===s?'selected':''}>${s}</option>`).join('')}
+      </select></div>
+    </div></div>
     <div>${renderKanban(shown)}</div>`;
 }
-function setF(type,val){
-  if(type==='s')S.fStatus=val==='all'?[]:(S.fStatus.includes(val)?S.fStatus.filter(x=>x!==val):[...S.fStatus,val]);
-  else if(type==='o')S.fOrigin=val==='all'?[]:(S.fOrigin.includes(val)?S.fOrigin.filter(x=>x!==val):[...S.fOrigin,val]);
+function setSel(type,val){
+  if(type==='s')S.fStatus=val;
+  else if(type==='o')S.fOrigin=val;
+  else if(type==='a'){S.fArea=val;S.fTeam='all';}
   else if(type==='tm')S.fTeam=val;
-  else S.fArea=val;
   renderView();
 }
 function taskCard(t){
@@ -855,9 +876,9 @@ function orgNode(u,seen){
   const kids=teamMembers(u.id).filter(k=>!seen.has(k.id));
   const n=userTasks(u.id).length;
   const vac=u.role==='vacant';
-  const col=u.role==='admin'?'var(--cyan)':(AREA_COLOR[u.area]||'var(--slate)');
+  const col=isAdminUser(u)?'var(--cyan)':(AREA_COLOR[u.area]||'var(--slate)');
   return `<li>
-    <div class="node ${u.role==='admin'?'is-admin':(vac?'is-vacant':'')}" style="${u.role==='admin'?'':'border-top:3px solid '+col}" onclick="openPerson('${u.id}')">
+    <div class="node ${isAdminUser(u)?'is-admin':(vac?'is-vacant':'')}" style="${isAdminUser(u)?'':'border-top:3px solid '+col}" onclick="openPerson('${u.id}')">
       ${vac?`<span class="node-count" style="background:var(--amber);min-width:auto;width:auto;height:auto;font-size:8px;font-weight:800;padding:2px 7px;letter-spacing:.5px">VACANTE</span>`:(n?`<span class="node-count" style="background:${col}">${n}</span>`:'')}
       ${vac?`<div class="avatar" style="width:40px;height:40px;font-size:22px;background:var(--surface2);color:var(--text3);border:1.5px dashed var(--text3);font-weight:400">＋</div>`:avatar(u,40)}
       <div class="node-name">${esc(u.name)}</div>
@@ -947,7 +968,7 @@ function openPerson(userId){
 /* ---------- TASK DETAIL ---------- */
 function openTask(id){
   curTaskId=id;const t=DATA.tasks.find(x=>x.id===id);if(!t)return;
-  const isAdmin=S.user.role==='admin';
+  const isAdmin=isAdminUser(S.user);
   const pL=DATA.progress[id]||[];const cL=DATA.comments[id]||[];
   openModal(`
     <div class="m-head"><span class="pill ${sCls(t.status)}"><span class="dot"></span>${t.status}</span><div class="m-title">${esc(t.title)}</div><button class="xbtn" onclick="closeModal()">×</button></div>
@@ -1089,7 +1110,7 @@ function areaManager(area){
   if(!area)return null;
   const inArea=DATA.users.filter(u=>u.role!=='vacant'&&u.role!=='inactive'&&u.area===area);
   if(!inArea.length)return null;
-  let m=inArea.find(u=>{const s=getU(u.supervisor_id);return s&&s.role==='admin';});
+  let m=inArea.find(u=>{const s=getU(u.supervisor_id);return s&&isAdminUser(s);});
   if(m)return m;
   m=inArea.find(u=>{const s=getU(u.supervisor_id);return !s||s.area!==area;});
   return m||inArea[0];
@@ -1201,7 +1222,7 @@ function renderReports(){
 function sRT(tab,el){el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));el.classList.add('active');showRT(tab);}
 function showRT(tab){
   const c=document.getElementById('rc');if(!c)return;
-  const isAdmin=S.user.role==='admin';
+  const isAdmin=isAdminUser(S.user);
   const scope=isAdmin?DATA.tasks:visibleTasks();
   if(tab==='general'){
     const ro=rollup(scope);
@@ -1288,7 +1309,7 @@ function renderUsers(){
       <td>${sup?`<div style="display:flex;align-items:center;gap:6px">${avatar(sup,22)}<span style="font-size:12px">${esc(sup.name)}</span></div>`:'<span style="color:var(--text3)">—</span>'}</td>
       <td>${u.role==='vacant'||inactive?'<span style="color:var(--text3)">—</span>':`<span style="font-family:var(--fm)">${esc(u.pin||'1234')}</span><button class="btn btn-xs" style="margin-left:7px" onclick="editPin('${u.id}',true)">cambiar</button>`}</td>
       <td>${n}</td>
-      <td><div style="display:flex;gap:6px;justify-content:flex-end">${u.role==='admin'?'<span style="font-size:11px;color:var(--text3)">—</span>':inactive?`<button class="btn btn-xs" onclick="reactivateUser('${u.id}')">Reactivar</button>`:`<button class="btn btn-xs" onclick="openEditUser('${u.id}')">Editar</button><button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')">Eliminar</button>`}</div></td>
+      <td><div style="display:flex;gap:6px;justify-content:flex-end">${isAdminUser(u)?'<span style="font-size:11px;color:var(--text3)">—</span>':inactive?`<button class="btn btn-xs" onclick="reactivateUser('${u.id}')">Reactivar</button>`:`<button class="btn btn-xs" onclick="openEditUser('${u.id}')">Editar</button><button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')">Eliminar</button>`}</div></td>
     </tr>`;}).join('')}
     </tbody></table></div>`;
 }
