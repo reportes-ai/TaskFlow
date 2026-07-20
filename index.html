@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0041A2">
 <meta name="description" content="TaskFlow AutoFácil — control de actividades, equipos, alertas y métricas.">
-<title>TaskFlow 4.3 · AutoFácil</title>
+<title>TaskFlow 4.2 · AutoFácil</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -389,17 +389,16 @@ body{background:#f4f7fb}
 @media(max-width:760px){.login-screen{display:block;background:#f4f7fb}.login-brand-pane{min-height:230px;padding:28px 24px 34px;justify-content:flex-start}.login-message{margin-top:36px}.login-heading{font-size:30px}.login-copy,.login-points,.login-footnote{display:none}.login-form-pane{padding:28px 20px 40px;align-items:flex-start}.login-box{background:#fff;padding:23px 20px;border:1px solid var(--border);border-radius:20px;box-shadow:var(--sh);margin-top:-30px;position:relative;z-index:3}.topbar{padding:10px 14px;min-height:66px}.shell-brand-sub,.account-copy,.top-search{display:none}.shell-brand{margin-right:0}.pg-title{font-size:15px}.menu-back span{display:none}.menu-back{width:38px;padding:0;justify-content:center}.content{padding:18px 14px}.menu-title{font-size:27px}.menu-welcome{margin-bottom:22px}.menu-snapshot{grid-template-columns:repeat(2,1fr)}.menu-grid{grid-template-columns:1fr}.menu-card{min-height:140px}.top-actions .btn-primary{display:none!important}}
 @media(max-width:420px){.login-pin .pin-in{width:52px;height:58px}.login-brand-pane{min-height:210px}.login-heading{font-size:27px}.menu-snapshot{grid-template-columns:1fr 1fr}.snapshot-card{padding:10px}.menu-title{font-size:24px}}
 
-/* TaskFlow 4.3 — resumen operativo y accesos rápidos por actividad */
+/* TaskFlow 4.2 — gestión de tareas simple y sin desplazamiento horizontal */
 .task-toolbar{margin-bottom:13px;padding:0 2px}.task-toolbar-title{font-size:15px}.task-view-help{font-size:11.5px;color:var(--text3);margin-top:3px}.task-toolbar .vtoggle{background:#e9eef6;padding:4px}.task-toolbar .vtoggle button{min-width:112px;justify-content:center;padding:7px 12px}.task-toolbar .vtoggle button.active{color:var(--navy)}
 .task-commandbar{background:#fff;border:1px solid var(--border);border-radius:18px;padding:13px 14px;margin-bottom:12px;box-shadow:0 4px 15px rgba(18,43,85,.045)}.task-command-main{display:flex;align-items:center;gap:9px}.task-search-main{position:relative;flex:1}.task-search-main svg{position:absolute;width:18px;height:18px;left:13px;top:11px;color:var(--text3);pointer-events:none}.task-search-main input{height:42px;padding:9px 13px 9px 40px;background:var(--surface2);border-color:transparent}.task-search-main input:focus{background:#fff;border-color:var(--cyan)}.filter-toggle{height:42px;padding:0 14px}.filter-toggle.has-filters{background:var(--cyan-soft);border-color:#b9e2fa;color:var(--navy)}.filter-bubble{min-width:18px;height:18px;border-radius:10px;background:var(--cyan);color:#fff;font-size:9px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}.filter-drawer{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr)) auto;gap:10px;align-items:end;border-top:1px solid var(--border);padding-top:13px;margin-top:13px}.filter-drawer .fsel{min-width:0}.filter-drawer .fsel select{height:40px;padding-top:7px;padding-bottom:7px}.filter-clear{height:40px}
 .status-strip{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 11px;scrollbar-width:none}.status-strip::-webkit-scrollbar{display:none}.status-filter{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:#fff;color:var(--text2);padding:7px 11px;border-radius:12px;font-size:11.5px;font-weight:700;white-space:nowrap;cursor:pointer;transition:.15s}.status-filter:hover{border-color:#bcdcf0;color:var(--navy)}.status-filter.active{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 5px 13px rgba(0,65,162,.16)}.status-filter-dot{width:7px;height:7px;border-radius:50%;background:var(--sc,var(--slate))}.status-filter.active .status-filter-dot{background:#fff}.status-filter-count{min-width:20px;height:19px;border-radius:10px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--text2);font-size:9.5px}.status-filter.active .status-filter-count{background:rgba(255,255,255,.17);color:#fff}
 .task-results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:5px 2px 11px}.task-results-count{font-size:11.5px;color:var(--text3);font-weight:650}.task-results-hint{font-size:10.5px;color:var(--text3)}
 .simple-list{display:flex;flex-direction:column;gap:9px}.simple-task{display:grid;grid-template-columns:minmax(280px,1.6fr) minmax(150px,.7fr) 128px 120px 118px 28px;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-radius:17px;padding:14px 15px;cursor:pointer;transition:.16s;position:relative;overflow:hidden}.simple-task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--lc,var(--slate))}.simple-task:hover{border-color:#c6dfef;box-shadow:0 9px 24px rgba(17,48,96,.08);transform:translateY(-1px)}.simple-main{min-width:0;padding-left:4px}.simple-title{font-size:13.5px;font-weight:780;line-height:1.35;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.simple-sub{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text3);margin-top:4px;white-space:nowrap;overflow:hidden}.simple-sub-text{overflow:hidden;text-overflow:ellipsis}.simple-owner{display:flex;align-items:center;gap:8px;min-width:0}.simple-owner-copy{min-width:0}.simple-owner-name{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.simple-owner-area{font-size:9.5px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.simple-progress{display:flex;align-items:center;gap:7px}.simple-progress .progress-mini{max-width:none}.simple-progress-value{font:700 10.5px/1 var(--fm);color:var(--text2);min-width:30px}.simple-due{font-size:10.5px;color:var(--text2);font-weight:650;white-space:nowrap}.simple-arrow{width:28px;height:28px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:15px}.simple-task:hover .simple-arrow{background:var(--cyan-soft);color:var(--navy)}.simple-label{display:none;font-size:8.5px;text-transform:uppercase;color:var(--text3);font-weight:750;letter-spacing:.35px;margin-bottom:4px}
-.simple-meta{grid-column:1/-1;display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-top:1px solid #edf1f6;padding:9px 0 0 4px;margin-top:-2px}.task-meta-static,.quick-chip,.delay-chip{min-height:27px;border-radius:9px;padding:5px 9px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:680;white-space:nowrap}.task-meta-static{color:var(--text2);background:var(--surface2)}.delay-chip{color:#b42336;background:#fff0f2;border:1px solid #ffd8df;font-weight:800}.delay-chip .urgency-mark{width:17px;height:17px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;font-size:11px}.quick-chip{appearance:none;border:1px solid var(--border);background:#fff;color:var(--text2);font-family:var(--ff);cursor:pointer;transition:.15s}.quick-chip:hover,.quick-chip:focus-visible{border-color:#9fd6f5;background:var(--cyan-soft);color:var(--navy);outline:none}.quick-chip.has-content{background:#eef8ff;border-color:#b8e0f7;color:#064b93}.quick-chip.is-unavailable{color:var(--text3)}.quick-section-title{min-width:0;flex:1}.quick-section-kicker{font-size:9.5px;color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.55px}.quick-section-task{font-size:15px;font-weight:780;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 .kanban{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;overflow:visible;padding-bottom:12px;align-items:start}.kcol{min-width:0;width:auto;max-height:none;background:#edf2f8}.kcol-body{overflow:visible;min-height:74px}.kcol.is-empty .kcol-body{min-height:54px}.kanban-empty{height:54px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:10.5px;border:1px dashed var(--border2);border-radius:11px;background:rgba(255,255,255,.45)}.kcard{cursor:pointer}.kcard .kc-title{padding-right:5px}
 @media(max-width:1120px){.simple-task{grid-template-columns:minmax(250px,1.5fr) minmax(130px,.65fr) 115px 100px 105px 28px;gap:10px}}
 @media(max-width:920px){.simple-task{grid-template-columns:minmax(250px,1fr) 135px 105px 28px}.simple-owner{display:none}.simple-progress{grid-column:2}.simple-due{grid-column:3}.simple-task>.pill{position:absolute;right:15px;top:13px}.simple-main{padding-right:110px}.filter-drawer{grid-template-columns:repeat(2,minmax(150px,1fr))}.filter-clear{width:100%}}
-@media(max-width:650px){.task-toolbar{align-items:flex-start}.task-toolbar .vtoggle{width:100%;order:2}.task-toolbar .vtoggle button{flex:1;min-width:0}.task-command-main{flex-wrap:wrap}.task-search-main{flex-basis:100%}.filter-toggle{flex:1}.task-command-main>.btn.btn-sm{flex:1;justify-content:center}.filter-drawer{grid-template-columns:1fr}.simple-task{grid-template-columns:1fr 92px 26px;padding:14px 12px}.simple-main{padding-right:0}.simple-task>.pill{position:static;grid-column:2;grid-row:1;justify-self:end}.simple-progress{grid-column:1;grid-row:2}.simple-due{grid-column:2;grid-row:2;text-align:right}.simple-arrow{grid-column:3;grid-row:1/3}.simple-label{display:block}.simple-meta{grid-column:1/-1;grid-row:3;margin-top:0;padding-left:0}.task-meta-static,.quick-chip,.delay-chip{font-size:10px}.quick-chip{flex:1;justify-content:center;min-width:112px}.task-results-hint{display:none}.kanban{grid-template-columns:1fr}.status-strip{margin-right:-14px;padding-right:14px}}
+@media(max-width:650px){.task-toolbar{align-items:flex-start}.task-toolbar .vtoggle{width:100%;order:2}.task-toolbar .vtoggle button{flex:1;min-width:0}.task-command-main{flex-wrap:wrap}.task-search-main{flex-basis:100%}.filter-toggle{flex:1}.task-command-main>.btn.btn-sm{flex:1;justify-content:center}.filter-drawer{grid-template-columns:1fr}.simple-task{grid-template-columns:1fr 92px 26px;padding:14px 12px}.simple-main{padding-right:0}.simple-task>.pill{position:static;grid-column:2;grid-row:1;justify-self:end}.simple-progress{grid-column:1;grid-row:2}.simple-due{grid-column:2;grid-row:2;text-align:right}.simple-arrow{grid-column:3;grid-row:1/3}.simple-label{display:block}.task-results-hint{display:none}.kanban{grid-template-columns:1fr}.status-strip{margin-right:-14px;padding-right:14px}}
 </style>
 </head>
 <body>
@@ -426,9 +425,8 @@ const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let S={user:null,view:'menu',fStatus:'all',fOrigin:'all',fArea:'all',fTeam:'all',fPriority:'all',fDue:'all',taskQuery:'',taskMode:'list',filtersOpen:false,teamMode:'org'};
-let DATA={users:[],tasks:[],progress:{},comments:{},fileCounts:{}};
+let DATA={users:[],tasks:[],progress:{},comments:{}};
 let curTaskId=null;
-const fileCountLoading=new Set();
 
 /* ---------- helpers ---------- */
 const uid=()=>([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
@@ -462,17 +460,6 @@ function dueInfo(s){
   const diff=Math.round((d-today)/86400000);
   let cls='';if(diff<0)cls='color:var(--red);font-weight:700';else if(diff<=3)cls='color:var(--amber);font-weight:700';
   return{txt:fmtDue(s),cls,diff};
-}
-const startDateOf=t=>t.start_date||(t.created_at?String(t.created_at).slice(0,10):'—');
-const hasOwn=(obj,key)=>Object.prototype.hasOwnProperty.call(obj,key);
-function fileCountOf(t){
-  if(t.attachment_count!==undefined&&t.attachment_count!==null&&Number.isFinite(Number(t.attachment_count)))return Number(t.attachment_count);
-  return hasOwn(DATA.fileCounts,t.id)?DATA.fileCounts[t.id]:undefined;
-}
-function fileCountText(count){
-  if(count===undefined)return '… documentos';
-  if(count===null)return 'Adjuntos';
-  return `${count} ${count===1?'documento':'documentos'}`;
 }
 
 function visibleTasks(){
@@ -551,7 +538,7 @@ async function loadAll(){
   DATA.users=uR.data||[];DATA.tasks=tR.data||[];
   DATA.progress={};(pR.data||[]).forEach(p=>{(DATA.progress[p.task_id]=DATA.progress[p.task_id]||[]).push(p);});
   DATA.comments={};(cR.data||[]).forEach(c=>{(DATA.comments[c.task_id]=DATA.comments[c.task_id]||[]).push(c);});
-  setSync('En vivo · v4.3',true);
+  setSync('En vivo · v4.2',true);
   updateBadges();
   if(S.user)renderView();
 }
@@ -570,7 +557,7 @@ function loginBrandPane(){return `<section class="login-brand-pane">
   <div class="login-logo">${logoMark()}<div><div class="login-logo-name">Task<em>Flow</em></div><div class="login-logo-sub">AUTOFÁCIL · GESTIÓN</div></div></div>
   <div class="login-message"><div class="login-kicker">Gestión simple y visible</div><div class="login-heading">Todo tu equipo,<br>en un solo lugar.</div><div class="login-copy">Organiza actividades, asigna responsables, recibe alertas y revisa el avance de cada área de manera clara.</div>
     <div class="login-points"><div class="login-point"><span>✓</span> Seguimiento en tiempo real</div><div class="login-point"><span>◷</span> Alertas y vencimientos</div><div class="login-point"><span>↗</span> Métricas de cumplimiento</div><div class="login-point"><span>◎</span> Responsables claros</div></div>
-  </div><div class="login-footnote">TaskFlow 4.3 · Plataforma interna AutoFácil</div>
+  </div><div class="login-footnote">TaskFlow 4.2 · Plataforma interna AutoFácil</div>
 </section>`;}
 function renderLogin(){
   S.user=null;closeModal();
@@ -887,7 +874,6 @@ function renderTaskArea(tasks){
   const el=document.getElementById('task-area');if(!el)return;
   const active=[S.taskQuery&&`Búsqueda: “${esc(S.taskQuery)}”`,S.fStatus!=='all'&&S.fStatus,S.fPriority!=='all'&&`Prioridad ${S.fPriority}`,S.fArea!=='all'&&S.fArea,S.fDue!=='all'&&({overdue:'Vencidas',soon:'Próximas a vencer',risk:'En riesgo',nodate:'Sin fecha'}[S.fDue])].filter(Boolean);
   el.innerHTML=`<div class="task-results-head"><span class="task-results-count">Mostrando ${f.length} de ${tasks.length} tarea${tasks.length===1?'':'s'}</span><span class="task-results-hint">${S.taskMode==='list'?'Ordenadas por urgencia y vencimiento':'Arrastra una tarjeta para cambiar su estado'}</span></div>${active.length?`<div class="active-filters">${active.map(x=>`<span class="active-filter">${x}</span>`).join('')}</div>`:''}${f.length?(S.taskMode==='list'?`<div class="simple-list">${f.map(simpleTaskRow).join('')}</div>`:renderKanban(f)):emptyBox('⌕','No hay tareas que coincidan con los filtros')}`;
-  if(S.taskMode==='list'&&f.length)hydrateFileCounts(f);
 }
 function taskSort(a,b){
   const rank=t=>{const d=dueInfo(t.due_date);if(t.status==='Completada')return 5;if(t.status==='Bloqueada')return 0;if(d.diff!==undefined&&d.diff<0)return 1;if(t.priority==='Alta')return 2;if(d.diff!==undefined&&d.diff<=3)return 3;return 4;};
@@ -953,21 +939,12 @@ function setSel(type,val){
 }
 function simpleTaskRow(t){
   const lc=STATUS_COLOR[t.status]||'var(--slate)';const di=dueInfo(t.due_date);const ids=t.assignees||[];const owner=getU(ids[0]);
-  const comments=(DATA.comments[t.id]||[]).length;const advances=(DATA.progress[t.id]||[]).length;const files=fileCountOf(t);
-  const late=t.status!=='Completada'&&di.diff<0?Math.abs(di.diff):0;const lateText=`${late} ${late===1?'día':'días'} de atraso`;
   return `<div class="simple-task" style="--lc:${lc}" onclick="openTask('${t.id}')">
     <div class="simple-main"><div class="simple-title">${esc(t.title)}</div><div class="simple-sub"><span class="pill ${prCls(t.priority)}" style="font-size:8.5px;padding:1px 6px">${t.priority}</span><span class="simple-sub-text">${esc(t.origin||'Sin origen')}${t.description?' · '+esc(t.description):''}</span></div></div>
     <div class="simple-owner">${owner?avatar(owner,30):avatar(null,30)}<div class="simple-owner-copy"><div class="simple-owner-name">${owner?esc(owner.name):'Sin responsable'}</div><div class="simple-owner-area">${owner?esc(owner.area||cargoOf(owner)||''):''}</div></div></div>
     <span class="pill ${sCls(t.status)}" style="justify-self:start"><span class="dot"></span>${t.status}</span>
     <div class="simple-progress"><div style="flex:1"><span class="simple-label">Avance</span><div class="progress-mini"><i style="width:${t.progress||0}%;background:${t.status==='Bloqueada'?'var(--red)':'linear-gradient(90deg,var(--cyan),var(--cyan2))'}"></i></div></div><span class="simple-progress-value">${t.progress||0}%</span></div>
     <div class="simple-due" style="${di.cls}"><span class="simple-label">Vencimiento</span>📅 ${di.txt}</div><div class="simple-arrow">→</div>
-    <div class="simple-meta">
-      <span class="task-meta-static" title="Fecha de inicio">◷ Inicio ${fmtDue(startDateOf(t))}</span>
-      ${late?`<span class="delay-chip" title="Actividad vencida"><span class="urgency-mark">!</span>${lateText}</span>`:''}
-      <button class="quick-chip ${comments?'has-content':''}" type="button" title="Ver únicamente los comentarios" onclick="event.stopPropagation();openTaskSection('${t.id}','comments')">💬 ${comments} ${comments===1?'comentario':'comentarios'}</button>
-      <button class="quick-chip ${advances?'has-content':''}" type="button" title="Ver únicamente los avances" onclick="event.stopPropagation();openTaskSection('${t.id}','progress')">↗ ${advances} ${advances===1?'avance':'avances'}</button>
-      <button class="quick-chip doc-count ${files>0?'has-content':files===null?'is-unavailable':''}" data-task="${t.id}" type="button" title="Ver únicamente los documentos adjuntos" onclick="event.stopPropagation();openTaskSection('${t.id}','files')">📎 ${fileCountText(files)}</button>
-    </div>
   </div>`;
 }
 function taskCard(t){
@@ -1166,25 +1143,6 @@ async function listFiles(taskId){
   if(error)throw error;
   return (data||[]).filter(f=>f.name&&f.name!=='.emptyFolderPlaceholder');
 }
-function updateFileCountUI(taskId,count){
-  document.querySelectorAll('.doc-count').forEach(el=>{
-    if(el.dataset.task!==String(taskId))return;
-    el.textContent='📎 '+fileCountText(count);
-    el.classList.toggle('has-content',Number.isFinite(count)&&count>0);
-    el.classList.toggle('is-unavailable',count===null);
-  });
-}
-async function hydrateFileCounts(tasks){
-  const pending=tasks.filter(t=>!hasOwn(DATA.fileCounts,t.id)&&!fileCountLoading.has(t.id));
-  pending.forEach(t=>fileCountLoading.add(t.id));
-  for(let i=0;i<pending.length;i+=6){
-    await Promise.all(pending.slice(i,i+6).map(async t=>{
-      try{const files=await listFiles(t.id);DATA.fileCounts[t.id]=files.length;updateFileCountUI(t.id,files.length);}
-      catch{DATA.fileCounts[t.id]=null;updateFileCountUI(t.id,null);}
-      finally{fileCountLoading.delete(t.id);}
-    }));
-  }
-}
 function fileUrl(path){return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;}
 function dispName(name){return name.includes('__')?name.split('__').slice(1).join('__'):name;}
 function fileIcon(name){const e=(name.split('.').pop()||'').toLowerCase();if(e==='pdf')return '📄';if(['xls','xlsx','csv'].includes(e))return '📊';if(['doc','docx'].includes(e))return '📝';if(['ppt','pptx'].includes(e))return '📽️';return '📎';}
@@ -1207,9 +1165,8 @@ async function uploadFiles(taskId,fileList,opts={}){
 async function loadFilesInto(taskId){
   const box=document.getElementById('files-box');if(!box)return;
   let items=[];
-  try{items=await listFiles(taskId);}catch(e){DATA.fileCounts[taskId]=null;updateFileCountUI(taskId,null);box.innerHTML=`<div style="color:var(--amber-t);background:var(--amber-l);border:1px solid #f3dca0;border-radius:var(--r);padding:10px 12px;font-size:12px;line-height:1.5">No se pudo acceder al almacenamiento. Crea el bucket público <b>«task-files»</b> en Supabase (ver instrucciones) para habilitar los adjuntos.</div>`;return;}
+  try{items=await listFiles(taskId);}catch(e){box.innerHTML=`<div style="color:var(--amber-t);background:var(--amber-l);border:1px solid #f3dca0;border-radius:var(--r);padding:10px 12px;font-size:12px;line-height:1.5">No se pudo acceder al almacenamiento. Crea el bucket público <b>«task-files»</b> en Supabase (ver instrucciones) para habilitar los adjuntos.</div>`;return;}
   curFiles=items;
-  DATA.fileCounts[taskId]=items.length;updateFileCountUI(taskId,items.length);
   if(!items.length){box.innerHTML='<div style="color:var(--text3);font-size:13px;padding:6px 0">Sin archivos adjuntos.</div>';return;}
   box.innerHTML=items.map((f,i)=>{const disp=dispName(f.name);const url=fileUrl(taskId+'/'+f.name);const kb=f.metadata&&f.metadata.size?Math.round(f.metadata.size/1024):0;return `<div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px">
     <span style="font-size:19px">${fileIcon(disp)}</span>
@@ -1293,16 +1250,6 @@ function openTask(id){
       <button class="btn btn-primary btn-sm" onclick="openEditTask('${t.id}')">Editar</button>
     </div>`);
   showTab('detail');
-}
-function openTaskSection(id,tab){
-  curTaskId=id;const t=DATA.tasks.find(x=>x.id===id);if(!t)return;
-  const sections={comments:['Comentarios','💬'],progress:['Avances','↗'],files:['Documentos adjuntos','📎']};
-  const section=sections[tab];if(!section)return;
-  openModal(`
-    <div class="m-head"><span style="font-size:22px" aria-hidden="true">${section[1]}</span><div class="quick-section-title"><div class="quick-section-kicker">${section[0]}</div><div class="quick-section-task">${esc(t.title)}</div></div><button class="xbtn" onclick="closeModal()" aria-label="Cerrar">×</button></div>
-    <div class="m-body"><div id="tab-body"></div></div>
-    <div class="m-foot"><button class="btn btn-sm" onclick="closeModal()">Cerrar</button></div>`);
-  showTab(tab);
 }
 function switchTab(tab,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');showTab(tab);}
 function showTab(tab){
