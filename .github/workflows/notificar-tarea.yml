@@ -2,7 +2,7 @@ name: Notificar nueva tarea
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -15,10 +15,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Instalar dependencias
-        run: npm install @supabase/supabase-js nodemailer
+        run: npm install @supabase/supabase-js nodemailer ws
         working-directory: .github/workflows/scripts
 
       - name: Enviar notificaciones
