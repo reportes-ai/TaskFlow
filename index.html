@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0041A2">
 <meta name="description" content="TaskFlow AutoFácil — control de actividades, equipos, alertas y métricas.">
-<title>TaskFlow 4.3 · AutoFácil</title>
+<title>TaskFlow 4.4 · AutoFácil</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -611,7 +611,7 @@ async function loadAll(){
   DATA.users=uR.data||[];DATA.tasks=tR.data||[];
   DATA.progress={};(pR.data||[]).forEach(p=>{(DATA.progress[p.task_id]=DATA.progress[p.task_id]||[]).push(p);});
   DATA.comments={};(cR.data||[]).forEach(c=>{(DATA.comments[c.task_id]=DATA.comments[c.task_id]||[]).push(c);});
-  setSync('En vivo · v4.3',true);
+  setSync('En vivo · v4.4',true);
   updateBadges();
   if(S.user)renderView();
 }
@@ -1443,7 +1443,8 @@ function showTab(tab){
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
           ${(t.assignees||[]).slice(1).map(id=>{const u=getU(id);if(!u)return'';const ger=areaManager(u.area);const isGer=ger&&ger.id===u.id;return `<div style="display:flex;align-items:center;gap:9px">${avatar(u,26)}<span style="font-size:12.5px;font-weight:600">${esc(u.name)}</span><span class="tag" style="font-size:9.5px;${isGer?'background:var(--cyan-soft);color:var(--navy)':''}">${isGer?'🏛️ Gerente · '+esc(u.area||''):esc(u.area||'')}</span></div>`;}).join('')}
         </div>
-      </div>`:''}`;
+      </div>`:''}
+      ${(()=>{const rh=(DATA.progress[t.id]||[]).filter(p=>String(p.text||'').startsWith('🔄'));if(!rh.length)return'';return `<div class="field"><div class="field-lbl">Historial de responsables (${rh.length})</div><div class="timeline" style="margin-top:4px">${[...rh].reverse().map(e=>`<div class="tl-entry"><div class="tl-dot" style="background:var(--violet)"></div><div class="tl-meta">${avById(e.user_id,18)} <b style="color:var(--text2)">${esc(uName(e.user_id))}</b> · ${fmtDate(e.created_at)}</div><div class="tl-text">${esc(e.text)}</div></div>`).join('')}</div></div>`;})()}`;
   }else if(tab==='progress'){
     c.innerHTML=`
       ${pL.length?`<div class="timeline">${[...pL].reverse().map(e=>`<div class="tl-entry"><div class="tl-dot"></div><div class="tl-meta">${avById(e.user_id,18)} <b style="color:var(--text2)">${esc(uName(e.user_id))}</b> · ${fmtDate(e.created_at)} · <span class="pill s-EnProgreso" style="font-size:9.5px;padding:1px 7px">${e.pct}%</span></div><div class="tl-text">${esc(e.text)}</div></div>`).join('')}</div>`:'<div style="color:var(--text3);font-size:13px;margin-bottom:6px">Aún no hay avances registrados.</div>'}
@@ -1602,7 +1603,7 @@ function openReassign(taskId){
       <div class="field"><div class="field-lbl">Nuevo responsable *</div><select id="ra-user" onchange="raPreview()"><option value="">— Selecciona —</option>${optsByArea}${optsOther}</select></div>
       <div id="ra-info" style="font-size:11.5px;color:var(--cyan);font-weight:600;display:none"></div>
       <div class="field"><div class="field-lbl">Motivo del cambio *</div><textarea id="ra-motivo" placeholder="Explica por qué se reasigna la tarea…"></textarea></div>
-      <div style="font-size:11px;color:var(--text3);font-weight:600;line-height:1.5">Se mantiene la corresponsabilidad: el nuevo responsable queda corresponsable con el Gerente de su área. Si cambia de área, también se conserva la corresponsabilidad anterior. Todo queda registrado en el historial.</div>
+      <div style="font-size:11px;color:var(--text3);font-weight:600;line-height:1.5">La tarea se <b>quita del responsable actual</b> y pasa al nuevo. El nuevo responsable queda corresponsable con el Gerente de su área, y el cambio queda registrado en el <b>historial de responsables</b>. Al responsable anterior se le notifica.</div>
     </div>
     <div class="m-foot"><button class="btn btn-sm" onclick="closeModal()">Cancelar</button><button class="btn btn-cyan btn-sm" id="btn-ra" onclick="doReassign('${taskId}')">Reasignar</button></div>`);
 }
@@ -1622,24 +1623,20 @@ async function doReassign(taskId){
   const newU=getU(newId);const oldResp=getU((t.assignees||[])[0]);
   if(oldResp&&oldResp.id===newId){toast('Esa persona ya es la responsable');return;}
   const newGer=areaManager(newU.area);
-  const oldGer=oldResp?areaManager(oldResp.area):null;
   const cross=oldResp&&oldResp.area&&newU.area&&oldResp.area!==newU.area;
-  const acc=[newId];
-  if(newGer&&newGer.id!==newId)acc.push(newGer.id);
-  if(oldResp&&!acc.includes(oldResp.id))acc.push(oldResp.id);
-  if(oldGer&&!acc.includes(oldGer.id))acc.push(oldGer.id);
-  (t.assignees||[]).forEach(idd=>{if(!acc.includes(idd))acc.push(idd);});
-  const assignees=[...new Set(acc)];
-  let hist=`🔄 Reasignada ${oldResp?'de '+oldResp.name+' ':''}a ${newU.name} (${newU.area||'sin área'}).`;
+  // La tarea se quita del responsable anterior y pasa al nuevo; solo se conserva al Gerente de su área como corresponsable.
+  const assignees=[newId];
+  if(newGer&&newGer.id!==newId)assignees.push(newGer.id);
+  let hist=`🔄 Responsable: ${oldResp?oldResp.name:'sin asignar'} → ${newU.name} (${newU.area||'sin área'}).`;
   if(newGer&&newGer.id!==newId)hist+=` Corresponsable: ${newGer.name} (Gerente ${newU.area}).`;
-  if(cross)hist+=` Cambio de área (${oldResp.area} → ${newU.area}): se mantiene la corresponsabilidad anterior.`;
+  if(cross&&oldResp)hist+=` [Cambio de área: ${oldResp.area} → ${newU.area}]`;
   hist+=` Motivo: ${motivo}`;
   const btn=document.getElementById('btn-ra');if(btn){btn.disabled=true;btn.textContent='Reasignando…';}
   await db.from('tf_progress').insert({task_id:taskId,user_id:S.user.id,text:hist,pct:t.progress||0});
-  await db.from('tf_comments').insert({task_id:taskId,user_id:S.user.id,text:`Reasignación de responsable — Motivo: ${motivo}`});
+  await db.from('tf_comments').insert({task_id:taskId,user_id:S.user.id,text:`🔄 Cambio de responsable: ${oldResp?oldResp.name:'sin asignar'} → ${newU.name}. Motivo: ${motivo}`});
   const{error}=await db.from('tf_tasks').update({assignees}).eq('id',taskId);
   if(error){toast('Error: '+error.message);if(btn){btn.disabled=false;btn.textContent='Reasignar';}return;}
-  closeModal();toast('Tarea reasignada ✓');await loadAll();notifyTask(taskId,'reassigned',{message:motivo});
+  closeModal();toast('Tarea reasignada ✓');await loadAll();notifyTask(taskId,'reassigned',{message:motivo,extra:oldResp?[oldResp.id]:[]});
 }
 function openEditTask(id){
   closeModal();const t=DATA.tasks.find(x=>x.id===id);
